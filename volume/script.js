@@ -1,11 +1,13 @@
 function sketch1(p) {
+    const side = getCanvasSize(400)
+
     p.setup = function () {
-        let canvas1 = p.createCanvas(400, 400);
+        let canvas1 = p.createCanvas(side, side);
         canvas1.parent('canvas1');
     }
 
     const diameter = 8;
-    let liquid = balls_init(400, 400)
+    let liquid = balls_init(400, side)
 
     p.draw = function () {
         p.background("black");
@@ -14,7 +16,7 @@ function sketch1(p) {
         for (let i of liquid) {
             repelMouse(i, p.mouseX, p.mouseY, 250, 50)
             updatefluid(i, liquid, 0.1, 0.1, 0.99)
-            updateparticle(i, 400, diameter)
+            updateparticle(i, side, diameter)
             p.fill("white");
             p.noStroke()
             p.circle(i.x, i.y, diameter - 0.1)
@@ -23,13 +25,16 @@ function sketch1(p) {
 }
 
 function sketch2(p) {
+    const side = getCanvasSize(400)
+
+
     p.setup = function () {
-        let canvas2 = p.createCanvas(400, 400);
+        let canvas2 = p.createCanvas(side, side);
         canvas2.parent('canvas2');
     }
 
     const diameter = 5;
-    let gas = balls_init(100, 400)
+    let gas = balls_init(100, side)
     gas = balls_vrandom(gas, 10)
 
     p.draw = function () {
@@ -39,7 +44,7 @@ function sketch2(p) {
         for (let i of gas) {
             attractMouse(i, p.mouseX, p.mouseY, 100, 50)
             updatefluid(i, gas, 0.001, 0.01, 1)
-            updateparticle(i, 400, diameter)
+            updateparticle(i, side, diameter)
             p.fill("white");
             p.noStroke()
             p.circle(i.x, i.y, diameter - 0.1)

@@ -1,3 +1,8 @@
+function getCanvasSize(maxSize) {
+    const available = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+    return Math.min(maxSize, available);
+}
+
 function balls_init(n_balls, canvas_size) {
     let particles = [];
     const rows = Math.ceil(n_balls / Math.sqrt(n_balls))
