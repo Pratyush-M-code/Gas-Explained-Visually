@@ -1,0 +1,107 @@
+:root {
+    --background: #FFFFFF;
+    --header: #949494;
+    --footer: #949494;
+    --text-color: #000000;
+    --heading: "IBM plex Mono", monospace;
+    --sub-heading: "IBM plex Mono", monospace;
+    --text: "IBM plex Sans", sans-serif;
+    --accent: #B7410E;
+    --hover: #a7a7a7;
+    --active: #9c2f00;
+}
+
+body {
+    background-color: var(--background);
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    padding: 0;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+header {
+    background-color: var(--header);
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+footer {
+    background-color: var(--footer);
+    width: 100%;
+}
+
+h1 {
+    color: var(--text-color);
+    font-size: 3rem;
+    font-family: var(--sub-heading);
+    line-height: 1;
+    font-weight: 400;
+    font-style: normal;
+    font-optical-sizing: auto;
+}
+
+h2 {
+    color: var(--text-color);
+    font-size: 2.25rem;
+    font-family: var(--heading);
+    line-height: 1;
+    font-weight: 400;
+    font-style: normal;
+    font-optical-sizing: auto;
+}
+
+p {
+    color: var(--text-color);
+    font-size: 1.5rem;
+    font-family: var(--text);
+    line-height: 1.2;
+    font-weight: 400;
+    font-style: normal;
+    font-optical-sizing: auto;
+}
+
+.site-footer {
+    width: 100%;
+    padding: 2rem 1rem;
+    text-align: center;
+}
+
+.footer-socials {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.footer-socials a {
+    color: inherit;
+    font-size: 1.25rem;
+    text-decoration: none;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.footer-socials i {
+    color: inherit;
+    font-size: 1.25rem;
+}
+
+.footer-socials a:hover {
+    transform: translateY(-2px);
+    opacity: 0.65;
+    color: var(--active);
+}
+
+.footer-credit {
+    font-weight: 800;
+    font-family: var(--text);
+    color: var(--text-color);
+    margin: 0;
+    font-size: 0.75rem;
+}
