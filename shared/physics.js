@@ -22,12 +22,88 @@ function balls_init(n_balls, canvas_size) {
     return particles
 }
 
-function updateliquid(element, liquid, gravity, attraction, diameter) {
-    element.vy = gravity
+function updateparticle(element, canvas_size, diameter) {
+    element.x += element.vx
+    element.y += element.vy
+    if (element.x > canvas_size - diameter / 2) {
+        element.x = canvas_size - diameter / 2;
+        element.vx *= -0.8;
+    }
+    if (element.x < diameter / 2) {
+        element.x = diameter / 2;
+        element.vx *= -0.8;
+    }
+    if (element.y < diameter / 2) {
+        element.y = diameter / 2;
+        element.vy *= -0.8;
+    }
+    if (element.y > canvas_size - diameter / 2) {
+        element.y = canvas_size - diameter / 2;
+        element.vy *= -0.8;
+    }
+}
 
-    for (let j in liquid) {
-        if (Math.round(Math.sqrt((element.x - j.x) ** 2 - (element.y - j.y) ** 2)) <= diameter) {
-            //to do
+function checkcollision(particleList, diameter) {
+    for (let a = 0; a < particleList.length; a++) {
+        for (let b = a + 1; b < particleList.length; b++) {
+            let element = particleList[a];
+            let j = particleList[b];
+
+            let dx = j.x - element.x;
+            let dy = j.y - element.y;
+            let dist = Math.sqrt(dx * dx + dy * dy)
+
+            if (j === element) continue
+            if (dist <= diameter && dist > 0) {
+                let nx = dx / dist; //normal vectors
+                let ny = dy / dist;
+
+                let overlap = diameter - dist; //check how much they overlap
+                element.x -= nx * overlap / 2;
+                element.y -= ny * overlap / 2;
+                j.x += nx * overlap / 2;
+                j.y += ny * overlap / 2;
+
+                let tx = -ny //tangent
+                let ty = nx
+
+                let rvx = j.vx - element.vx;
+                let rvy = j.vy - element.vy;
+
+                let vn = rvx * nx + rvy * ny;
+
+                if (vn >= 0) continue;
+
+                element.vx += vn * nx;
+                element.vy += vn * ny;
+
+                j.vx -= vn * nx;
+                j.vy -= vn * ny;
+            }
         }
     }
+}
+function updateliquid(element, liquid, gravity, attraction, diameter) {
+    //gravity
+    element.vy += gravity
+
+    //attraction
+    for (let j of liquid) {
+        if (j === element) continue;
+
+        let dx = j.x - element.x;
+        let dy = j.y - element.y;
+        let distance = Math.sqrt(dx * dx + dy * dy)
+        let angle = Math.atan2(dy, dx)
+
+        if (distance === 0) continue;
+
+        let force = attraction / (distance * distance)
+        element.vx = element.vx + (force * Math.cos(angle))
+        element.vy = element.vy + (force * Math.sin(angle))
+    }
+
+    //energy loss
+    element.vx *= 0.99;
+    element.vy *= 0.99;
 }

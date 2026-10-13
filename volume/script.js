@@ -4,15 +4,19 @@ function sketch1(p) {
         canvas1.parent('canvas1');
     }
 
-    let gas = balls_init(100, 400)
+    const diameter = 20;
+    let gas = balls_init(150, 400)
 
     p.draw = function () {
         p.background("black");
 
         for (let i of gas) {
-            p.circle(i.x, i.y, 10)
+            checkcollision(gas, diameter)
+            updateliquid(i, gas, 0.1, 0.001, diameter)
+            updateparticle(i, 400, diameter)
+            p.fill("white");
+            p.circle(i.x, i.y, diameter)
         }
-        p.circle(200, 200, 10)
     }
 }
 
