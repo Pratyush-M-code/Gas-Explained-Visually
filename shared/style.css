@@ -3,15 +3,17 @@
     --header: #949494;
     --footer: #949494;
     --text-color: #000000;
-    --heading: "IBM plex Mono", monospace;
-    --sub-heading: "IBM plex Mono", monospace;
-    --text: "IBM plex Sans", sans-serif;
+    --heading: "IBM Plex Mono", monospace;
+    --sub-heading: "IBM Plex Mono", monospace;
+    --text: "IBM Plex Sans", sans-serif;
     --accent: #B7410E;
-    --hover: #a7a7a7;
+    --overlay: #a7a7a77a;
     --active: #9c2f00;
 }
 
 body {
+    justify-content: center;
+    align-items: center;
     background-color: var(--background);
     display: flex;
     flex-direction: column;
@@ -28,6 +30,7 @@ header {
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
+    padding: 1vh 5vw;
 }
 
 footer {
@@ -63,6 +66,20 @@ p {
     font-weight: 400;
     font-style: normal;
     font-optical-sizing: auto;
+}
+
+.content {
+    display: flex;
+    background-color: var(--overlay);
+    margin: 1vh 5vw;
+}
+
+.text {
+    margin: 1vh 3vw;
+}
+
+.canvas {
+    margin: 1vh 3vw;
 }
 
 .site-footer {

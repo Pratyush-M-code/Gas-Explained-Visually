@@ -3,9 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Website</title>
-    <link rel="stylesheet" href="./style.css">
-    <script src="script.js"></script>
+    <link rel="stylesheet" href="shared/style.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,8 +15,6 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-
-    <script src="index.js"></script>
 </head>
 
 <body>
@@ -25,7 +23,18 @@
     </header>
 
     <main>
-        <h1>Welcome to My Website</h1>
+        <div id="intro">
+            <h1>Welcome to My Website</h1>
+        </div>
+        <div id="explain">
+            <h2></h2>
+        </div>
+        <div id="navigation">
+            <nav>
+                <a href="../volume/volume.html" target="_blank" rel="noopener noreferrer" aria-label="Volume"> Volume
+                </a>
+            </nav>
+        </div>
     </main>
 
     <footer class="site-footer">
@@ -44,6 +53,7 @@
         </div>
         <p class="footer-credit"> Made by Pratyush Mohanty Circar © 2026 </p>
     </footer>
+    <script src="script.js"></script>
 </body>
 
 </html>
