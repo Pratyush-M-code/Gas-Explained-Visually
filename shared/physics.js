@@ -22,6 +22,27 @@ function balls_init(n_balls, canvas_size) {
     return particles
 }
 
+function balls_vrandom(particles, KE) {
+    let total = 0;
+
+    for (let p of particles) {
+        p.vx = Math.random() * 2 - 1;
+        p.vy = Math.random() * 2 - 1;
+
+        total += p.vx * p.vx + p.vy * p.vy;
+    }
+
+    if (total === 0 || particles.length === 0) return;
+
+    let scale = Math.sqrt((2 * KE) / total);
+
+    for (let p of particles) {
+        p.vx *= scale;
+        p.vy *= scale;
+    }
+    return particles;
+}
+
 function updateparticle(element, canvas_size, diameter) {
     element.x += element.vx
     element.y += element.vy
@@ -83,12 +104,13 @@ function checkcollision(particleList, diameter) {
         }
     }
 }
-function updateliquid(element, liquid, gravity, attraction, diameter) {
+
+function updatefluid(element, fluid, gravity, attraction, retardation) {
     //gravity
     element.vy += gravity
 
     //attraction
-    for (let j of liquid) {
+    for (let j of fluid) {
         if (j === element) continue;
 
         let dx = j.x - element.x;
@@ -104,6 +126,30 @@ function updateliquid(element, liquid, gravity, attraction, diameter) {
     }
 
     //energy loss
-    element.vx *= 0.99;
-    element.vy *= 0.99;
+    element.vx *= retardation;
+    element.vy *= retardation;
+}
+
+function repelMouse(element, mouseX, mouseY, repelForce, repelDistance) {
+    let dx = mouseX - element.x;
+    let dy = mouseY - element.y;
+    let distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance > 0 && distance < repelDistance) {
+        let angle = Math.atan2(dy, dx);
+        let force = repelForce / Math.max((distance * distance), 25);
+        element.vx -= force * Math.cos(angle);
+        element.vy -= force * Math.sin(angle);
+    }
+}
+
+function attractMouse(element, mouseX, mouseY, attractForce, attractDistance) {
+    let dx = mouseX - element.x;
+    let dy = mouseY - element.y;
+    let distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance > 0 && distance < attractDistance) {
+        let angle = Math.atan2(dy, dx);
+        let force = attractForce / Math.max((distance * distance), 25);
+        element.vx += force * Math.cos(angle);
+        element.vy += force * Math.sin(angle);
+    }
 }
