@@ -1,5 +1,8 @@
-function getCanvasSize(maxSize) {
-    const available = Math.min(window.innerWidth, window.innerHeight) * 0.9;
+function getCanvasSize(maxSize, containerId) {
+    const container = document.getElementById(containerId);
+    const available = container && container.clientWidth > 0
+        ? container.clientWidth
+        : window.innerWidth * 0.9;
     return Math.min(maxSize, available);
 }
 

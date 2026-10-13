@@ -1,13 +1,12 @@
 function sketch1(p) {
-    const side = getCanvasSize(400)
+    let side, diameter, liquid;
 
     p.setup = function () {
-        let canvas1 = p.createCanvas(side, side);
-        canvas1.parent('canvas1');
+        side = getCanvasSize(400, 'canvas1');
+        p.createCanvas(side, side).parent('canvas1');
+        diameter = 8;
+        liquid = balls_init(400, side);
     }
-
-    const diameter = 8;
-    let liquid = balls_init(400, side)
 
     p.draw = function () {
         p.background("black");
@@ -25,17 +24,15 @@ function sketch1(p) {
 }
 
 function sketch2(p) {
-    const side = getCanvasSize(400)
-
+    let side, diameter, gas;
 
     p.setup = function () {
-        let canvas2 = p.createCanvas(side, side);
-        canvas2.parent('canvas2');
+        side = getCanvasSize(400, 'canvas2');
+        p.createCanvas(side, side).parent('canvas2');
+        diameter = 5;
+        gas = balls_init(100, side);
+        gas = balls_vrandom(gas, 10);
     }
-
-    const diameter = 5;
-    let gas = balls_init(100, side)
-    gas = balls_vrandom(gas, 10)
 
     p.draw = function () {
         p.background("black");

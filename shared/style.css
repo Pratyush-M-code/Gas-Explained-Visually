@@ -60,7 +60,7 @@ h1 {
 
 h2 {
     color: var(--text-color);
-    font-size: 2.25rem;
+    font-size: clamp(1.5rem, 7vw, 2.25rem);
     font-family: var(--heading);
     line-height: 1;
     font-weight: 400;
@@ -89,14 +89,16 @@ p {
 }
 
 .text {
-    flex: 1;
+    flex: 1 1 250px;
     min-width: 0;
     margin: 1vh 1vw;
+    overflow-wrap: anywhere;
 }
 
 .canvas {
+    flex: 0 1 400px;
+    max-width: 100%;
     margin: 1vh 0 1vh auto;
-    flex-shrink: 0;
 }
 
 .site-footer {
