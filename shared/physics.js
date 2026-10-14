@@ -30,6 +30,31 @@ function balls_init(n_balls, canvas_size) {
     return particles
 }
 
+function balls_block(n_balls, canvas_size, diameter) {
+    let particles = [];
+    const rows = Math.ceil(n_balls / Math.sqrt(n_balls))
+    const spacing = Math.round(diameter * 1.25)
+    let space = (n_balls / rows) * spacing
+    let posx = (canvas_size - space) / 2
+    let index = 0
+    for (let x = 0; x < rows; x++) {
+        posx = posx + spacing
+        let posy = (canvas_size - space) / 2
+        for (let y = 0; y < rows; y++) {
+            posy = posy + spacing
+            particles.push({ x: posx, y: posy, vx: 0, vy: 0 })
+            index = index + 1
+            if (index >= n_balls) {
+                return particles
+            }
+        }
+        if (index >= n_balls) {
+            return particles
+        }
+    }
+    return particles
+}
+
 function balls_vrandom(particles, KE) {
     let total = 0;
 
@@ -138,6 +163,47 @@ function updatefluid(element, fluid, gravity, attraction, retardation) {
     element.vy *= retardation;
 }
 
+function updatesolid(element, solid, gravity, attraction, equilibriumDistance, retardation, side, diameter) {
+    //gravity
+    element.vy += gravity
+
+    //attraction
+    for (let j of solid) {
+        if (j === element) continue;
+
+        let dx = j.x - element.x;
+        let dy = j.y - element.y;
+        let distance = Math.sqrt(dx * dx + dy * dy)
+        let attractionDistance = 1.5 * (equilibriumDistance + diameter)
+        let angle = Math.atan2(dy, dx)
+        const r0 = diameter + equilibriumDistance
+        let force = 0
+
+        if (distance === 0) continue;
+
+        if (distance < attractionDistance) {
+            force = attraction * (distance - r0) / (distance * distance);
+            if (distance < r0) force *= 2;
+        }
+        element.vx = element.vx + (force * Math.cos(angle))
+        element.vy = element.vy + (force * Math.sin(angle))
+    }
+
+    //energy loss
+    for (let j of solid) {
+        if (j === element) continue;
+
+        let dx = j.x - element.x;
+        let dy = j.y - element.y;
+        let d = Math.sqrt(dx * dx + dy * dy);
+
+        if (d > 0 && d < diameter + equilibriumDistance * 1.2) {
+            element.vx += (j.vx - element.vx) * (1 - retardation);
+            element.vy += (j.vy - element.vy) * (1 - retardation);
+        }
+    }
+}
+
 function repelMouse(element, mouseX, mouseY, repelForce, repelDistance) {
     let dx = mouseX - element.x;
     let dy = mouseY - element.y;
@@ -157,6 +223,30 @@ function attractMouse(element, mouseX, mouseY, attractForce, attractDistance) {
     if (distance > 0 && distance < attractDistance) {
         let angle = Math.atan2(dy, dx);
         let force = attractForce / Math.max((distance * distance), 25);
+        element.vx += force * Math.cos(angle);
+        element.vy += force * Math.sin(angle);
+    }
+}
+
+function mouseInteract(element, mouseX, mouseY, diameter) {
+    let dx = element.x - mouseX
+    let dy = element.y - mouseY
+    let distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance < (diameter / 2)) {
+        return true
+    }
+    else {
+        return false
+    }
+}
+
+function applyForce(element, mouseX, mouseY, diameter, forceMultiplier, maxForce) {
+    let dx = mouseX - element.x
+    let dy = mouseY - element.y
+    let distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance >= diameter / 2) {
+        let angle = Math.atan2(dy, dx);
+        let force = Math.min(forceMultiplier * distance, maxForce);
         element.vx += force * Math.cos(angle);
         element.vy += force * Math.sin(angle);
     }
