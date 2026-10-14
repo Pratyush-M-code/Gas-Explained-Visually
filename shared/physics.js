@@ -183,23 +183,27 @@ function updatesolid(element, solid, gravity, attraction, equilibriumDistance, r
 
         if (distance < attractionDistance) {
             force = attraction * (distance - r0) / (distance * distance);
-            if (distance < r0) force *= 2;
+            if (distance < r0) force *= 3;
         }
         element.vx = element.vx + (force * Math.cos(angle))
         element.vy = element.vy + (force * Math.sin(angle))
     }
 
+
+    //speed bump
+    let speed = Math.hypot(element.vx, element.vy);
+    if (speed > 4) {
+        element.vx *= 4 / speed;
+        element.vy *= 4 / speed;
+    }
+
     //energy loss
     for (let j of solid) {
         if (j === element) continue;
-
-        let dx = j.x - element.x;
-        let dy = j.y - element.y;
-        let d = Math.sqrt(dx * dx + dy * dy);
-
-        if (d > 0 && d < diameter + equilibriumDistance * 1.2) {
-            element.vx += (j.vx - element.vx) * (1 - retardation);
-            element.vy += (j.vy - element.vy) * (1 - retardation);
+        let dx = j.x - element.x, dy = j.y - element.y;
+        if (dx * dx + dy * dy < 39 * 39) {
+            element.vx += (j.oldVx - element.oldVx) * 0.05;
+            element.vy += (j.oldVy - element.oldVy) * 0.05;
         }
     }
 }

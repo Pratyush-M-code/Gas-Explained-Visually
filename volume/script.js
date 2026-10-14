@@ -27,9 +27,13 @@ function solid(p) {
 
     p.draw = function () {
         p.background(p.color('#a7a7a7'));
+        for (let i of solid) {
+            i.oldVx = i.vx;
+            i.oldVy = i.vy;
+        }
 
         for (let i of solid) {
-            updatesolid(i, solid, 0, 150, 1, 0.9, side, diameter)
+            updatesolid(i, solid, 0, 40, 1, 0.99, side, diameter)
         }
         for (let i of solid) {
             updateparticle(i, side, diameter)
@@ -39,7 +43,7 @@ function solid(p) {
         }
 
         if (selected) {
-            applyForce(selected, p.mouseX, p.mouseY, diameter, 0.1, 4)
+            applyForce(selected, p.mouseX, p.mouseY, diameter, 0.1, 2)
             p.stroke('black')
             p.line(selected.x, selected.y, p.mouseX, p.mouseY)
         }
