@@ -40,7 +40,7 @@ function sketch2(p) {
 
         for (let i of gas) {
             attractMouse(i, p.mouseX, p.mouseY, 100, 50)
-            updatefluid(i, gas, 0.001, 0.01, 1)
+            updatefluid(i, gas, 0, 0.01, 1)
             updateparticle(i, side, diameter)
             p.fill("white");
             p.noStroke()
