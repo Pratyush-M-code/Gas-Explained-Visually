@@ -1,12 +1,28 @@
 function getCanvasSize(maxSize, containerId) {
     const container = document.getElementById(containerId);
-    const available = container && container.clientWidth > 0
-        ? container.clientWidth
-        : window.innerWidth * 0.9;
+    let available
+    if (container && container.clientWidth > 0) {
+        available = container.clientWidth
+    }
+    else {
+        available = window.innerWidth * 0.9
+    }
     return Math.min(maxSize, available);
 }
 
-function balls_init(n_balls, canvas_size) {
+function balls_init(n_balls, canvas_size, containerId) {
+
+    const container = document.getElementById(containerId)
+    let available
+    if (container && container.clientWidth > 0) {
+        available = container.clientWidth
+    }
+    else {
+        available = window.innerWidth * 0.9
+    }
+    proportional_balls = (n_balls * available) / 400
+    n_balls = Math.min(n_balls, proportional_balls)
+
     let particles = [];
     const rows = Math.ceil(n_balls / Math.sqrt(n_balls))
     const spacing = Math.round(canvas_size / (rows + 1))
@@ -30,7 +46,19 @@ function balls_init(n_balls, canvas_size) {
     return particles
 }
 
-function balls_block(n_balls, canvas_size, diameter) {
+function balls_block(n_balls, canvas_size, containerId, diameter) {
+
+    const container = document.getElementById(containerId)
+    let available
+    if (container && container.clientWidth > 0) {
+        available = container.clientWidth
+    }
+    else {
+        available = window.innerWidth * 0.9
+    }
+    proportional_balls = (n_balls * available) / 400
+    n_balls = Math.min(n_balls, proportional_balls)
+
     let particles = [];
     const rows = Math.ceil(n_balls / Math.sqrt(n_balls))
     const spacing = Math.round(diameter * 1.25)
@@ -76,24 +104,24 @@ function balls_vrandom(particles, KE) {
     return particles;
 }
 
-function updateparticle(element, canvas_size, diameter) {
+function updateparticle(element, canvas_size, diameter, elasticity) {
     element.x += element.vx
     element.y += element.vy
     if (element.x > canvas_size - diameter / 2) {
         element.x = canvas_size - diameter / 2;
-        element.vx *= -0.8;
+        element.vx *= -elasticity;
     }
     if (element.x < diameter / 2) {
         element.x = diameter / 2;
-        element.vx *= -0.8;
+        element.vx *= -elasticity;
     }
     if (element.y < diameter / 2) {
         element.y = diameter / 2;
-        element.vy *= -0.8;
+        element.vy *= -elasticity;
     }
     if (element.y > canvas_size - diameter / 2) {
         element.y = canvas_size - diameter / 2;
-        element.vy *= -0.8;
+        element.vy *= -elasticity;
     }
 }
 
@@ -202,8 +230,8 @@ function updatesolid(element, solid, gravity, attraction, equilibriumDistance, r
         if (j === element) continue;
         let dx = j.x - element.x, dy = j.y - element.y;
         if (dx * dx + dy * dy < 39 * 39) {
-            element.vx += (j.oldVx - element.oldVx) * 0.05;
-            element.vy += (j.oldVy - element.oldVy) * 0.05;
+            element.vx += (j.oldVx - element.oldVx) * (1 - retardation);
+            element.vy += (j.oldVy - element.oldVy) * (1 - retardation);
         }
     }
 }
