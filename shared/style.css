@@ -99,6 +99,8 @@ p {
     flex: 0 1 400px;
     max-width: 100%;
     margin: 1vh 0 1vh auto;
+    touch-action: none;
+    display: block;
 }
 
 .site-footer {

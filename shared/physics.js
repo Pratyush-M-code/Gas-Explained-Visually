@@ -228,8 +228,9 @@ function updatesolid(element, solid, gravity, attraction, equilibriumDistance, r
     //energy loss
     for (let j of solid) {
         if (j === element) continue;
-        let dx = j.x - element.x, dy = j.y - element.y;
-        if (dx * dx + dy * dy < 39 * 39) {
+        let dx = j.x - element.x;
+        let dy = j.y - element.y;
+        if (dx * dx + dy * dy < ((equilibriumDistance + diameter) * 1.5) ** 2) {
             element.vx += (j.oldVx - element.oldVx) * (1 - retardation);
             element.vy += (j.oldVy - element.oldVy) * (1 - retardation);
         }
