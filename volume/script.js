@@ -1,5 +1,5 @@
 function vol_solid_sim(p) {
-    let side, diameter, solid, selected;
+    let side, diameter, solid, selected, view;
 
     p.setup = function () {
         side = getCanvasSize(400, 'solid_sim');
@@ -8,6 +8,7 @@ function vol_solid_sim(p) {
         solid = balls_block(64, side, 'solid_sim', diameter);
         solid = balls_vrandom(solid, 100);
         selected = null
+        view = Visible('solid_sim')
     }
 
     p.mousePressed = function () {
@@ -26,6 +27,8 @@ function vol_solid_sim(p) {
     }
 
     p.draw = function () {
+        if (!view.visible) return
+
         p.background(p.color('#a7a7a7'));
         for (let i of solid) {
             i.oldVx = i.vx;
@@ -51,16 +54,19 @@ function vol_solid_sim(p) {
 }
 
 function vol_liquid_sim(p) {
-    let side, diameter, liquid;
+    let side, diameter, liquid, view;
 
     p.setup = function () {
         side = getCanvasSize(400, 'liquid_sim');
         p.createCanvas(side, side).parent('liquid_sim');
         diameter = 8;
         liquid = balls_init(400, side, 'liquid_sim');
+        view = Visible('liquid_sim')
     }
 
     p.draw = function () {
+        if (!view.visible) return
+
         p.background(p.color('#a7a7a7'));
         checkcollision(liquid, diameter)
 
@@ -76,7 +82,7 @@ function vol_liquid_sim(p) {
 }
 
 function vol_gas_sim(p) {
-    let side, diameter, gas;
+    let side, diameter, gas, view;
 
     p.setup = function () {
         side = getCanvasSize(400, 'gas_sim');
@@ -84,9 +90,12 @@ function vol_gas_sim(p) {
         diameter = 5;
         gas = balls_init(100, side, 'gas_sim');
         gas = balls_vrandom(gas, 10);
+        view = Visible('gas_sim')
     }
 
     p.draw = function () {
+        if (!view.visible) return
+
         p.background(p.color('#a7a7a7'));
         checkcollision(gas, diameter)
 

@@ -10,6 +10,17 @@ function getCanvasSize(maxSize, containerId) {
     return Math.min(maxSize, available);
 }
 
+function Visible(containerId) {
+    const userViewing = { visible: true }
+    element = document.getElementById(containerId)
+    if (element && 'IntersectionObserver' in window) {
+        new IntersectionObserver(entries => {
+            userViewing.visible = entries[0].isIntersecting
+        }).observe(element)
+    }
+    return userViewing
+}
+
 function balls_init(n_balls, canvas_size, containerId) {
 
     const container = document.getElementById(containerId)
