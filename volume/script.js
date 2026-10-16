@@ -36,7 +36,7 @@ function vol_solid_sim(p) {
         }
 
         for (let i of solid) {
-            updatesolid(i, solid, 0, 60, 1, 0.95, side, diameter)
+            updatesolid(i, solid, 0, 60, 1, 0.95, 1, side, diameter)
         }
         for (let i of solid) {
             updateparticle(i, side, diameter, 0.8)
@@ -83,10 +83,9 @@ function vol_liquid_sim(p) {
         p.background(p.color('#a7a7a7'));
 
         boxWidth = boxWidth + Math.max(-(diameter / 2), Math.min((diameter / 2), targetWidth - boxWidth))
-        for (let check = 0; check > 2; check += 1) {
+        for (let check = 0; check < 2; check++) {
             checkcollision(liquid, diameter)
         }
-        checkcollision(liquid, diameter)
 
         for (let i of liquid) {
             repelMouse(i, p.mouseX, p.mouseY, 250, 50)
@@ -134,9 +133,6 @@ function vol_gas_sim(p) {
         p.background(p.color('#a7a7a7'));
 
         boxSize = boxSize + Math.max(-(diameter / 2), Math.min((diameter / 2), targetSize - boxSize))
-        for (let check = 0; check > 1; check += 1) {
-            checkcollision(gas, diameter)
-        }
         checkcollision(gas, diameter)
 
         for (let i of gas) {

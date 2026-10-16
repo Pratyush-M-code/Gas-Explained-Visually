@@ -103,18 +103,31 @@ p {
     flex: 0 1 400px;
     max-width: 100%;
     margin: 1vh 0 1vh auto;
-    touch-action: none;
-    display: block;
     display: flex;
     flex-direction: column-reverse;
-    cursor: pointer;
+    touch-action: none;
 }
 
 canvas {
     touch-action: none;
     display: block;
-    border-color: var(--border);
-    border: 5px solid;
+    border: 5px solid var(--border);
+}
+
+#solid_sim canvas {
+    cursor: grab;
+}
+
+#solid_sim canvas:active {
+    cursor: grabbing;
+}
+
+#liquid_sim canvas {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 11V3M13 6l3-3 3 3M16 21v8M13 26l3 3 3-3M11 16H3M6 13l-3 3 3 3M21 16h8M26 13l3 3-3 3'/%3E%3C/svg%3E") 16 16, crosshair;
+}
+
+#gas_sim canvas {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 3v8M13 8l3 3 3-3M16 29v-8M13 24l3-3 3 3M3 16h8M8 13l3 3-3 3M29 16h-8M24 13l-3 3 3 3'/%3E%3C/svg%3E") 16 16, crosshair;
 }
 
 input {

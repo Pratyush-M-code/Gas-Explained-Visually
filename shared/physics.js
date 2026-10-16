@@ -12,7 +12,7 @@ function getCanvasSize(maxSize, containerId) {
 
 function Visible(containerId) {
     const userViewing = { visible: true }
-    element = document.getElementById(containerId)
+    let element = document.getElementById(containerId)
     if (element && 'IntersectionObserver' in window) {
         new IntersectionObserver(entries => {
             userViewing.visible = entries[0].isIntersecting
@@ -31,7 +31,7 @@ function balls_init(n_balls, canvas_size, containerId) {
     else {
         available = window.innerWidth * 0.9
     }
-    proportional_balls = (n_balls * available) / 400
+    let proportional_balls = n_balls * ((available / 400) ** 2)
     n_balls = Math.min(n_balls, proportional_balls)
 
     let particles = [];
@@ -67,7 +67,7 @@ function balls_block(n_balls, canvas_size, containerId, diameter) {
     else {
         available = window.innerWidth * 0.9
     }
-    proportional_balls = (n_balls * available) / 400
+    proportional_balls = (n_balls * available ** 2) / (400 ** 2)
     n_balls = Math.min(n_balls, proportional_balls)
 
     let particles = [];
@@ -95,14 +95,24 @@ function balls_block(n_balls, canvas_size, containerId, diameter) {
 }
 
 function balls_vrandom(particles, KE) {
-    let total = 0;
+    let total = 0, avgx = 0, avgy = 0;
 
     for (let p of particles) {
         p.vx = Math.random() * 2 - 1;
         p.vy = Math.random() * 2 - 1;
 
         total += p.vx * p.vx + p.vy * p.vy;
+        avgx += p.vx
+        avgy += p.vy
     }
+
+    const n = particles.length;
+    avgx /= n; avgy /= n;
+    for (let p of particles) {
+        p.vx -= avgx;
+        p.vy -= avgy;
+    }
+    total -= n * (avgx * avgx + avgy * avgy);
 
     if (total === 0 || particles.length === 0) return;
 
@@ -198,7 +208,7 @@ function updatefluid(element, fluid, diameter, gravity, attraction, retardation)
             element.vy = element.vy + (force * Math.sin(angle))
         }
         if (distance < diameter) {
-            let force = (attraction / 2) / Math.max(distance * distance, 64)
+            let force = -(attraction / 2) / Math.max(distance * distance, 64)
             element.vx = element.vx + (force * Math.cos(angle))
             element.vy = element.vy + (force * Math.sin(angle))
         }
@@ -209,20 +219,19 @@ function updatefluid(element, fluid, diameter, gravity, attraction, retardation)
     element.vy *= retardation;
 }
 
-function updatesolid(element, solid, gravity, attraction, equilibriumDistance, retardation, side, diameter) {
+function updatesolid(element, solid, gravity, attraction, equilibriumDistance, relativeSlowing, retardation, side, diameter) {
     //gravity
     element.vy += gravity
 
     //attraction
+    const r0 = diameter + equilibriumDistance
+    const attractionDistance = 1.5 * (equilibriumDistance + diameter)
     for (let j of solid) {
         if (j === element) continue;
 
         let dx = j.x - element.x;
         let dy = j.y - element.y;
         let distance = Math.sqrt(dx * dx + dy * dy)
-        let attractionDistance = 1.5 * (equilibriumDistance + diameter)
-        let angle = Math.atan2(dy, dx)
-        const r0 = diameter + equilibriumDistance
         let force = 0
 
         if (distance === 0) continue;
@@ -231,8 +240,8 @@ function updatesolid(element, solid, gravity, attraction, equilibriumDistance, r
             force = attraction * (distance - r0) / (distance * distance);
             if (distance < r0) force *= 3;
         }
-        element.vx = element.vx + (force * Math.cos(angle))
-        element.vy = element.vy + (force * Math.sin(angle))
+        element.vx = element.vx + (force * (dx / distance))
+        element.vy = element.vy + (force * (dy / distance))
     }
 
 
@@ -243,16 +252,20 @@ function updatesolid(element, solid, gravity, attraction, equilibriumDistance, r
         element.vy *= 4 / speed;
     }
 
-    //energy loss
+    // relative energy loss
     for (let j of solid) {
         if (j === element) continue;
         let dx = j.x - element.x;
         let dy = j.y - element.y;
         if (dx * dx + dy * dy < ((equilibriumDistance + diameter) * 1.5) ** 2) {
-            element.vx += (j.oldVx - element.oldVx) * (1 - retardation);
-            element.vy += (j.oldVy - element.oldVy) * (1 - retardation);
+            element.vx += (j.oldVx - element.oldVx) * (1 - relativeSlowing);
+            element.vy += (j.oldVy - element.oldVy) * (1 - relativeSlowing);
         }
     }
+
+    //energy loss
+    element.vx *= retardation;
+    element.vy *= retardation;
 }
 
 function repelMouse(element, mouseX, mouseY, repelForce, repelDistance) {
