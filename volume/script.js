@@ -104,31 +104,54 @@ function vol_liquid_sim(p) {
 }
 
 function vol_gas_sim(p) {
-    let side, diameter, gas, view;
+    let side, diameter, gas, view, boxSize, targetSize;
+    const slider = document.getElementById('gas_size')
+    const readout = document.getElementById('gas_readout')
 
     p.setup = function () {
         side = getCanvasSize(400, 'gas_sim');
         p.createCanvas(side, side).parent('gas_sim');
         diameter = 5;
         gas = balls_init(100, side, 'gas_sim');
-        gas = balls_vrandom(gas, 10);
+        gas = balls_vrandom(gas, 200);
         view = Visible('gas_sim')
+
+        //slider logic
+        slider.min = Math.round(side * 0.4)
+        slider.max = Math.round(side)
+        slider.value = Math.round(side)
+        readout.textContent = Math.round(side) + ' px'
+        slider.addEventListener('input', () => {
+            targetSize = Number(slider.value)
+            readout.textContent = targetSize + ' px'
+        })
+        boxSize = targetSize = side
     }
 
     p.draw = function () {
         if (!view.visible) return
 
         p.background(p.color('#a7a7a7'));
+
+        boxSize = boxSize + Math.max(-(diameter / 2), Math.min((diameter / 2), targetSize - boxSize))
+        for (let check = 0; check > 1; check += 1) {
+            checkcollision(gas, diameter)
+        }
         checkcollision(gas, diameter)
 
         for (let i of gas) {
             attractMouse(i, p.mouseX, p.mouseY, 100, 50)
             updatefluid(i, gas, diameter, 0, 0.01, 1)
-            updateparticle(i, side, diameter, 1)
+            updateparticle(i, boxSize, diameter, 1)
             p.fill("black");
             p.noStroke()
             p.circle(i.x, i.y, diameter - 0.1)
         }
+
+        p.stroke('#B7410E')
+        p.strokeWeight(3)
+        p.line(boxSize, 0, boxSize, boxSize)
+        p.line(0, boxSize, boxSize, boxSize)
     }
 }
 
