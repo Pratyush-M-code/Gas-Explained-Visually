@@ -54,7 +54,9 @@ function vol_solid_sim(p) {
 }
 
 function vol_liquid_sim(p) {
-    let side, diameter, liquid, view;
+    let side, diameter, liquid, view, boxWidth, targetWidth;
+    const slider = document.getElementById('liquid_width')
+    const readout = document.getElementById('liquid_readout')
 
     p.setup = function () {
         side = getCanvasSize(400, 'liquid_sim');
@@ -62,22 +64,42 @@ function vol_liquid_sim(p) {
         diameter = 8;
         liquid = balls_init(400, side, 'liquid_sim');
         view = Visible('liquid_sim')
+
+        //slider logic
+        slider.min = Math.round(side * 0.4)
+        slider.max = Math.round(side)
+        slider.value = Math.round(side)
+        readout.textContent = Math.round(side) + ' px'
+        slider.addEventListener('input', () => {
+            targetWidth = Number(slider.value)
+            readout.textContent = targetWidth + ' px'
+        })
+        boxWidth = targetWidth = side
     }
 
     p.draw = function () {
         if (!view.visible) return
 
         p.background(p.color('#a7a7a7'));
+
+        boxWidth = boxWidth + Math.max(-(diameter / 2), Math.min((diameter / 2), targetWidth - boxWidth))
+        for (let check = 0; check > 2; check += 1) {
+            checkcollision(liquid, diameter)
+        }
         checkcollision(liquid, diameter)
 
         for (let i of liquid) {
             repelMouse(i, p.mouseX, p.mouseY, 250, 50)
-            updatefluid(i, liquid, 0.1, 0.1, 0.99)
-            updateparticle(i, side, diameter, 0.8)
+            updatefluid(i, liquid, diameter, 0.1, 0.1, 0.99)
+            updateparticle(i, side, diameter, 0.8, boxWidth)
             p.fill("black");
             p.noStroke()
             p.circle(i.x, i.y, diameter - 0.1)
         }
+
+        p.stroke('#B7410E')
+        p.strokeWeight(3)
+        p.line(boxWidth, 0, boxWidth, side)
     }
 }
 
@@ -101,7 +123,7 @@ function vol_gas_sim(p) {
 
         for (let i of gas) {
             attractMouse(i, p.mouseX, p.mouseY, 100, 50)
-            updatefluid(i, gas, 0, 0.01, 1)
+            updatefluid(i, gas, diameter, 0, 0.01, 1)
             updateparticle(i, side, diameter, 1)
             p.fill("black");
             p.noStroke()

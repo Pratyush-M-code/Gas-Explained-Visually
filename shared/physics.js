@@ -115,19 +115,19 @@ function balls_vrandom(particles, KE) {
     return particles;
 }
 
-function updateparticle(element, canvas_size, diameter, elasticity) {
+function updateparticle(element, canvas_size, diameter, elasticity, wallposX = canvas_size, wall0Y = 0) {
     element.x += element.vx
     element.y += element.vy
-    if (element.x > canvas_size - diameter / 2) {
-        element.x = canvas_size - diameter / 2;
+    if (element.x > wallposX - diameter / 2) {
+        element.x = wallposX - diameter / 2;
         element.vx *= -elasticity;
     }
     if (element.x < diameter / 2) {
         element.x = diameter / 2;
         element.vx *= -elasticity;
     }
-    if (element.y < diameter / 2) {
-        element.y = diameter / 2;
+    if (element.y < wall0Y + (diameter / 2)) {
+        element.y = wall0Y + (diameter / 2);
         element.vy *= -elasticity;
     }
     if (element.y > canvas_size - diameter / 2) {
@@ -177,11 +177,11 @@ function checkcollision(particleList, diameter) {
     }
 }
 
-function updatefluid(element, fluid, gravity, attraction, retardation) {
+function updatefluid(element, fluid, diameter, gravity, attraction, retardation) {
     //gravity
     element.vy += gravity
 
-    //attraction
+    //attraction + repulsion
     for (let j of fluid) {
         if (j === element) continue;
 
@@ -192,9 +192,16 @@ function updatefluid(element, fluid, gravity, attraction, retardation) {
 
         if (distance === 0) continue;
 
-        let force = attraction / (distance * distance)
-        element.vx = element.vx + (force * Math.cos(angle))
-        element.vy = element.vy + (force * Math.sin(angle))
+        if (distance > diameter) {
+            let force = attraction / Math.max(distance * distance, 64)
+            element.vx = element.vx + (force * Math.cos(angle))
+            element.vy = element.vy + (force * Math.sin(angle))
+        }
+        if (distance < diameter) {
+            let force = (attraction / 2) / Math.max(distance * distance, 64)
+            element.vx = element.vx + (force * Math.cos(angle))
+            element.vy = element.vy + (force * Math.sin(angle))
+        }
     }
 
     //energy loss

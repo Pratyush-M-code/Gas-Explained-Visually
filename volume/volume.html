@@ -42,21 +42,29 @@
                         shape</b>. This is due to a weaker force of attraction between the molecules of the liquid!
                     Hence, a liquid's volume is the <b>capacity of a container required to hold the liquid</b>.
                     <br>Check out the simulation; it depicts a low-viscosity (willing to flow) liquid. See how it flows
-                    and is never truly stationary. Also, observe that the liquid changes its <b>shape to fit the
-                        container</b> it is stored in.
+                    and is never truly stationary. <br> Use the slider to change the width of the canvas. Also, observe
+                    that the liquid changes its <b>shape to fit the container</b> it is stored in.
                 </p>
             </div>
             <div class="canvas" id="liquid_sim" role="img"
                 aria-label="Small balls that simulate liquid behavior and is repelled by mouse pointer.">
                 <!-- The canvas will be created here by p5.js -->
+                <div>
+                    <label for="liquid_width">
+                        <p>Width of the container: <output id="liquid_readout"></output></p>
+                    </label>
+                    <input type="range" id="liquid_width" aria-label="Width of the container in which liquid is stored">
+                </div>
             </div>
         </div>
         <div class="content">
             <div class="text">
                 <h2>Gaseous Volumes</h2>
                 <p>In gases, particles move <b>freely and rapidly in all directions</b>, with very weak forces of
-                    attraction between them. This allows gases to have <b>neither a fixed shape nor a fixed volume</b>.
-                    Instead, a gas expands to fill the entire container it occupies. <br>In this simulation, observe how
+                    attraction between them. This allows gases to have <b>neither a fixed shape nor a fixed
+                        volume</b>.
+                    Instead, a gas expands to fill the entire container it occupies. <br>In this simulation, observe
+                    how
                     all particles move and <b>spread randomly until they have filled the available space</b>.
                     <br>Unlike solids and liquids, gases are highly compressible due to their empty spaces. <br>This
                     means that the volume of a gas <b>depends on the size of its container</b>!
