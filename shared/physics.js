@@ -67,18 +67,18 @@ function balls_block(n_balls, canvas_size, containerId, diameter) {
     else {
         available = window.innerWidth * 0.9
     }
-    proportional_balls = (n_balls * available ** 2) / (400 ** 2)
+    const proportional_balls = (n_balls * available ** 2) / (400 ** 2)
     n_balls = Math.min(n_balls, proportional_balls)
 
     let particles = [];
     const rows = Math.ceil(n_balls / Math.sqrt(n_balls))
     const spacing = Math.round(diameter * 1.25)
     let space = (n_balls / rows) * spacing
-    let posx = (canvas_size - space) / 2
+    let posx = (canvas_size - (rows - 1) * spacing) / 2 - spacing
     let index = 0
     for (let x = 0; x < rows; x++) {
         posx = posx + spacing
-        let posy = (canvas_size - space) / 2
+        let posy = (canvas_size - (rows - 1) * spacing) / 2 - spacing
         for (let y = 0; y < rows; y++) {
             posy = posy + spacing
             particles.push({ x: posx, y: posy, vx: 0, vy: 0 })
@@ -198,19 +198,18 @@ function updatefluid(element, fluid, diameter, gravity, attraction, retardation)
         let dx = j.x - element.x;
         let dy = j.y - element.y;
         let distance = Math.sqrt(dx * dx + dy * dy)
-        let angle = Math.atan2(dy, dx)
 
         if (distance === 0) continue;
 
         if (distance > diameter) {
             let force = attraction / Math.max(distance * distance, 64)
-            element.vx = element.vx + (force * Math.cos(angle))
-            element.vy = element.vy + (force * Math.sin(angle))
+            element.vx = element.vx + (force * (dx / distance))
+            element.vy = element.vy + (force * (dy / distance))
         }
         if (distance < diameter) {
             let force = -(attraction / 2) / Math.max(distance * distance, 64)
-            element.vx = element.vx + (force * Math.cos(angle))
-            element.vy = element.vy + (force * Math.sin(angle))
+            element.vx = element.vx + (force * (dx / distance))
+            element.vy = element.vy + (force * (dy / distance))
         }
     }
 
@@ -219,7 +218,7 @@ function updatefluid(element, fluid, diameter, gravity, attraction, retardation)
     element.vy *= retardation;
 }
 
-function updatesolid(element, solid, gravity, attraction, equilibriumDistance, relativeSlowing, retardation, side, diameter) {
+function updatesolid(element, solid, gravity, attraction, equilibriumDistance, relativeSlowing, retardation, maxSpeed, side, diameter) {
     //gravity
     element.vy += gravity
 
@@ -247,9 +246,9 @@ function updatesolid(element, solid, gravity, attraction, equilibriumDistance, r
 
     //speed bump
     let speed = Math.hypot(element.vx, element.vy);
-    if (speed > 4) {
-        element.vx *= 4 / speed;
-        element.vy *= 4 / speed;
+    if (speed > maxSpeed) {
+        element.vx *= maxSpeed / speed;
+        element.vy *= maxSpeed / speed;
     }
 
     // relative energy loss

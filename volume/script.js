@@ -36,7 +36,7 @@ function vol_solid_sim(p) {
         }
 
         for (let i of solid) {
-            updatesolid(i, solid, 0, 60, 1, 0.95, 1, side, diameter)
+            updatesolid(i, solid, 0, 60, 1, 0.95, 1, 4, side, diameter)
         }
         for (let i of solid) {
             updateparticle(i, side, diameter, 0.8)
