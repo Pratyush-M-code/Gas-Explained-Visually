@@ -146,6 +146,22 @@ label {
     width: 35%;
     color: var(--overlay);
     padding: 0 2vw;
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+@media (max-width: 700px) {
+    footer {
+        flex-direction: column;
+    }
+
+    h1 {
+        font-size: clamp(2rem, 7vw, 3rem);
+    }
+
+    .navigation {
+        width: 100%;
+    }
 }
 
 #next {
