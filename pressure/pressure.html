@@ -36,7 +36,11 @@
             <div class="text">
                 <h2>Pressure in Gases</h2>
                 <p>Pressure = Force / Area <br> Pressure = <output id="pressure_readout"></output> = <output
-                        id="Force_readout"></output> / <output id="side_readout"></output> </p>
+                        id="force_readout"></output> / <output id="area_readout"></output> </p>
+                <div>
+                    <canvas id="pressure_graph"></canvas>
+                    <p>Average Pressure <output id="pressure_avg_readout"></output> </p>
+                </div>
             </div>
             <div class="canvas" id="wall_sim" role="img"
                 aria-label="Small balls that simulate liquid behavior and is repelled by mouse pointer.">
