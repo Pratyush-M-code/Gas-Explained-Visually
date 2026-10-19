@@ -26,7 +26,7 @@ function pressure_intro_sim(p) {
 
 function pressure_wall_sim(p) {
     let side, view, diameter, gas, force = 0, pressure = 0, impulse = 0, frameCount = 0;
-    const frameCounter = 30
+    const frameCounter = 6
     const pressure_readout = document.getElementById('pressure_readout')
     const force_readout = document.getElementById('force_readout')
     const area_readout = document.getElementById('area_readout')
@@ -140,17 +140,107 @@ function pressure_wall_sim(p) {
 }
 
 function pressure_total_sim(p) {
-    let side, view;
+    let side, diameter, gas, view, force = 0, frames = 0, impulse = 0, pressure = 0, n, pressureSum, avgPressure;
+    const frameCounter = 15;
+    const total_pressure_readout = document.getElementById('total_pressure_readout')
+    const avg_total_pressure_readout = document.getElementById('avg_total_pressure_readout')
 
     p.setup = function () {
         side = getCanvasSize(400, 'total_sim');
         p.createCanvas(side, side).parent('total_sim');
+        diameter = 8;
+        gas = balls_init(100, side, 'total_sim');
+        gas = balls_vrandom(gas, 200);
         view = Visible('total_sim')
+        n = 0
+        pressureSum = 0
     }
 
     p.draw = function () {
         if (!view.visible) return
+
         p.background(p.color('#a7a7a7'));
+
+        checkcollision(gas, diameter)
+
+
+
+        for (let i of gas) {
+            updatefluid(i, gas, diameter, 0, 0.01, 1)
+
+            if (i.x + i.vx + diameter / 2 > side) {
+                impulse += 2 * Math.abs(i.vx);
+            }
+            if (i.x + i.vx + diameter / 2 < 0) {
+                impulse += 2 * Math.abs(i.vx);
+            }
+            if (i.y + i.vy + diameter / 2 < 0) {
+                impulse += 2 * Math.abs(i.vy);
+            }
+            if (i.y + i.vy + diameter / 2 > side) {
+                impulse += 2 * Math.abs(i.vy);
+            }
+
+            updateparticle(i, side, diameter, 1)
+
+            if (p.mouseIsPressed) {
+                attractMouse(i, p.mouseX, p.mouseY, 100, 200, 25)
+            }
+
+            if (Math.abs(i.vx) > Math.abs(i.vy) && i.vx < 0) {
+                p.fill("red");
+                p.noStroke()
+            }
+            else {
+                if (Math.abs(i.vx) > Math.abs(i.vy) && i.vx > 0) {
+                    p.fill("blue");
+                    p.noStroke()
+                }
+                else {
+                    if (Math.abs(i.vy) > Math.abs(i.vx) && i.vy < 0) {
+                        p.fill("green");
+                        p.noStroke()
+                    }
+                    else {
+                        if (Math.abs(i.vy) > Math.abs(i.vx) && i.vy > 0) {
+                            p.fill("yellow");
+                            p.noStroke()
+                        }
+                        else {
+                            p.fill("black")
+                            p.noStroke()
+                        }
+                    }
+                }
+            }
+            p.circle(i.x, i.y, diameter - 0.1)
+        }
+        p.stroke("red");
+        p.strokeWeight(7)
+        p.line(0, 0, 0, side)
+        p.stroke("blue");
+        p.strokeWeight(7)
+        p.line(side, 0, side, side)
+        p.stroke("green");
+        p.strokeWeight(7)
+        p.line(0, 0, side, 0)
+        p.stroke("yellow");
+        p.strokeWeight(7)
+        p.line(0, side, side, side)
+
+        //output
+        if (++frames >= frameCounter) {
+            force = impulse / frames;
+            pressure = force / (4 * side);
+            total_pressure_readout.textContent = pressure.toFixed(4)
+
+            impulse = 0;
+            frames = 0;
+            pressureSum += pressure;
+            n++;
+            avgPressure = pressureSum / n;
+            avg_total_pressure_readout.textContent = avgPressure.toFixed(4);
+        }
     }
 }
 

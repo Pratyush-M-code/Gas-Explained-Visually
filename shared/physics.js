@@ -279,13 +279,13 @@ function repelMouse(element, mouseX, mouseY, repelForce, repelDistance) {
     }
 }
 
-function attractMouse(element, mouseX, mouseY, attractForce, attractDistance) {
+function attractMouse(element, mouseX, mouseY, attractForce, attractDistance, maxAttraction = 25) {
     let dx = mouseX - element.x;
     let dy = mouseY - element.y;
     let distance = Math.sqrt(dx * dx + dy * dy);
     if (distance > 0 && distance < attractDistance) {
         let angle = Math.atan2(dy, dx);
-        let force = attractForce / Math.max((distance * distance), 25);
+        let force = attractForce / Math.max((distance * distance), maxAttraction);
         element.vx += force * Math.cos(angle);
         element.vy += force * Math.sin(angle);
     }
