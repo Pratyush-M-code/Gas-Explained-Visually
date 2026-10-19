@@ -25,7 +25,15 @@
         <div class="content">
             <div class="text">
                 <h2>Introduction to Pressure</h2>
-                <p>WIP...</p>
+                <p>Pressure is usually defined as Force by Area of application. <br> But, where does that Pressure come
+                    from? In gases, pressure arrises from the collisions of the gases particles with th walls of the
+                    container. These collisions occure due to the repulsive force of these particles in realtion to one
+                    another! </p>
+                <p>The 3D model on the right is made of balls (representing particles), that are packed tightly at one
+                    end and spread out the other end. <br> You can drag to rotate it! <br> when the balls are crowded,
+                    they extert more pressure on their surrounding! This is what <b>High Pressure represents greater
+                        density of particles</b>. While on the other end, since the particles are fruther spaced. <b>Low
+                        Pressure represents a lower density of particles.</b></p>
             </div>
             <div class="canvas" id="intro_sim" role="img"
                 aria-label="A 3d body made of balls that is compressed in one end to represent pressure">
@@ -35,12 +43,24 @@
         <div class="content">
             <div class="text">
                 <h2>Pressure in Gases</h2>
-                <p>Pressure = Force / Area <br> Pressure = <output id="pressure_readout"></output> = <output
-                        id="force_readout"></output> / <output id="area_readout"></output> </p>
+                <p>Let's take the example of the right hand side wall! <br> The pressure felt this wall is due to the
+                    collisions of the gaseous particles (the ones that are black) with the wall. Since the simulation is
+                    2D, the area upon which the force is applied will be taken to be the side length.</p>
+                <p> Every bounce of a black particle adds to the force on that wall. The readout averages the hits over
+                    about one second, because a single hit is far too brief to measure. In real life, there are so many
+                    particles and they are so spreadout and randomized that the pressure is averaged out to be constant.
+                </p>
+                <p>Pressure = Force / Area <br> Pressure = <output id="pressure_readout"></output> =
+                    <output id="force_readout"></output> / <output id="area_readout"></output>
+                </p>
                 <div>
                     <canvas id="pressure_graph"></canvas>
                     <p>Average Pressure <output id="pressure_avg_readout"></output> </p>
                 </div>
+                <p>The graph shows the recording of the instantanous pressure and the dashed line is the average of all
+                    the readings. Single values fluctualte but the averag remains constant. <br>Try to interact with the
+                    particles inside the box with the mouse and introduce extra energy into it. See what happens to the
+                    Average Pressure and the Pressure.</p>
             </div>
             <div class="canvas" id="wall_sim" role="img"
                 aria-label="Small balls that simulate liquid behavior and is repelled by mouse pointer.">
