@@ -12,6 +12,7 @@ function pressure_intro_sim(p) {
 
     p.draw = function () {
         if (!view.visible) return
+        if (!shape) return
         p.background(p.color('#a7a7a7'));
         p.orbitControl();
 
@@ -26,7 +27,7 @@ function pressure_intro_sim(p) {
 
 function pressure_wall_sim(p) {
     let side, view, diameter, gas, force = 0, pressure = 0, impulse = 0, frameCount = 0;
-    const frameCounter = 6
+    const frameCounter = 60
     const pressure_readout = document.getElementById('pressure_readout')
     const force_readout = document.getElementById('force_readout')
     const area_readout = document.getElementById('area_readout')
@@ -47,7 +48,6 @@ function pressure_wall_sim(p) {
         diameter = 10;
         gas = balls_init(70, side, 'wall_sim');
         gas = balls_vrandom(gas, 200);
-        view = Visible('wall_sim')
         area_readout.textContent = side + ' px'
 
         graph.width = side

@@ -9,6 +9,7 @@ This project to to help explain the different gaseous laws and their relations i
 - [Screenshots](#screenshots)
 - [FAQ](#faq)
 - [License](#license)
+- [Acknowlegements](#acknowlegements)
 
 ## Features
 
