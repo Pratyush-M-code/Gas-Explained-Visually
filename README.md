@@ -23,6 +23,12 @@ This project to to help explain the different gaseous laws and their relations i
 - An interactive liquid sim that has variable container width
 - An interactive gas sim with variable container size
 
+### Pressure
+
+- 3D cube simulation
+- Pressure graph + Gas Sim
+- Gas Simuation (Colour coded for each wall)
+
 ## Usage
 
 [Click Me!](https://pratyush-m-code.github.io/Gas-Explained-Visually/)
