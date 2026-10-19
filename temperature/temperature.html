@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperature</title>
+    <link rel="stylesheet" href="../shared/style.css">
+    <link rel="icon" type="image/x-icon" href="../shared/assets/Temperature.png">
+
+    <link rel=" preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.3.4/lib/p5.min.js"></script>
+    <script src="../shared/physics.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>Temperature</h1>
+    </header>
+    <main>
+        <div class="content">
+            <div class="text">
+                <h2>What is Temperature?</h2>
+                <p></p>
+            </div>
+            <div class="canvas" id="phase_transition_sim" role="img"
+                aria-label="A soft solid with a slider that increase temperature to induce phase transition.">
+                <!-- The canvas will be created here by p5.js -->
+                <div>
+                    <label for="temp-phase-transition">
+                        <p>Temperature of body: <output id="temp-phase-transition-readout"></output></p>
+                    </label>
+                    <input type="range" id="temp-phase-transition" aria-label="Temperature of Gas">
+                </div>
+            </div>
+        </div>
+        <div class="content">
+            <div class="text">
+                <h2>Temperature as a Measure of Internal Energy</h2>
+                <p></p>
+            </div>
+            <div class="canvas" id="internal_energy_sim" role="img"
+                aria-label="Small balls that simulate gasous behavior and its speed increases with temperature">
+                <!-- The canvas will be created here by p5.js -->
+                <div>
+                    <label for="temp-internal-energy">
+                        <p>Internal Energy of body: <output id="internal_energy_readout"></output></p>
+                        <p>Temperature of body: <output id="temp_internal_energy_readout"></output></p>
+                    </label>
+                    <input type="range" id="temp-internal-energy" aria-label="Temperature of Gas">
+                </div>
+            </div>
+        </div>
+        <div class="content">
+            <div class="text">
+                <h2>For Future Sims</h2>
+                <p></p>
+            </div>
+            <div class="canvas" id="temp_change_sim" role="img"
+                aria-label="Introdution to redshift or blueshift of background when temperature change occurs.">
+                <!-- The canvas will be created here by p5.js -->
+                <div>
+                    <label for="temp-change">
+                        <p>Temperature of body: <output id="temp-change-readout"></output></p>
+                    </label>
+                    <input type="range" id="temp-change" aria-label="Temperature of Gas">
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer id="individual-navigation">
+        <div class="navigation" id="back">
+            <nav>
+                <a href="../pressure/pressure.html" rel="noopener noreferrer" aria-label="Pressure">
+                    <h2>Back to Previous Page</h2>
+                    <p>Pressure</p>
+                </a>
+            </nav>
+        </div>
+        <div class="navigation" style="align-items: center;">
+            <h1 style="text-align: center;">Navigation</h1>
+        </div>
+        <div class="navigation" id="next">
+            <nav>
+                <a href="" rel="noopener noreferrer" aria-label="WIP">
+                    <h2>Onward to Next Page</h2>
+                    <p>WIP</p>
+                </a>
+            </nav>
+        </div>
+        <!-- navigation to next site -->
+    </footer>
+    <script src="script.js"></script>
+</body>
+
+</html>
