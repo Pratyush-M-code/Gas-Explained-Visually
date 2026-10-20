@@ -57,6 +57,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [p5.js docs](https://p5js.org/) Caus you can never find the thing you want to when to need to
 - [W3 Schools](<https://www.w3schools.com/>) Who doesn't use W3 schools?
 - [Youtube](https://www.youtube.com/) Random tutorials
+- [Lennard-Jones Potential](https://www.sciencedirect.com/topics/pharmacology-toxicology-and-pharmaceutical-science/lennard-jones-potential) For understanding the formula and logic for solid interaction of attraction.
 
 ---
 

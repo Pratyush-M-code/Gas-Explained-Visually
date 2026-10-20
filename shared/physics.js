@@ -267,6 +267,48 @@ function updatesolid(element, solid, gravity, attraction, equilibriumDistance, r
     element.vy *= retardation;
 }
 
+function updatematter(element, matter, gravity, attractive_coeff, relativeSlowing, retardation, maxForce, diameter) {
+    //gravity
+    element.vy += gravity
+
+    //attraction by Lennard-Jones Potential
+    let E = attractive_coeff; //Depth of potential well so attraction
+    let s = (diameter * 1.25) / Math.pow(2, 1 / 6);
+    let equilibriumDistance = Math.pow((2 * (s ** 6)), 1 / 6)
+    let distance_cutoff_sq = (2.5 * s) ** 2
+    for (let j of matter) {
+        let dx = j.x - element.x;
+        let dy = j.y - element.y;
+        let distance_sq = dx * dx + dy * dy;
+        if (distance_sq === 0 || distance_sq > distance_cutoff_sq) {
+            continue
+        }
+        let distance_clamp_sq = Math.max(distance_sq, (s ** 2))
+        let force = 24 * E * (2 * (s * s / distance_clamp_sq) ** 6 - (s * s / distance_clamp_sq) ** 3) / distance_clamp_sq
+        const distance = Math.sqrt(distance_sq)
+        if (Math.abs(force * distance) > maxForce) force = Math.sign(force) * maxForce / distance
+
+        element.vx -= force * dx
+        element.vy -= force * dy
+    }
+
+    // relative energy loss
+    const relative_energy = Math.pow(2, 1 / 6) * s
+    for (let j of matter) {
+        if (j === element) continue
+        const dx = j.x - element.x
+        const dy = j.y - element.y
+        if (dx * dx + dy * dy < (1.5 * relative_energy) ** 2) {
+            element.vx += (j.oldVx - element.oldVx) * (1 - relativeSlowing)
+            element.vy += (j.oldVy - element.oldVy) * (1 - relativeSlowing)
+        }
+    }
+
+    //energy loss
+    element.vx *= retardation;
+    element.vy *= retardation;
+}
+
 function repelMouse(element, mouseX, mouseY, repelForce, repelDistance) {
     let dx = mouseX - element.x;
     let dy = mouseY - element.y;
