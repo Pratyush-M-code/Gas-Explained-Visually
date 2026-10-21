@@ -309,6 +309,22 @@ function updatematter(element, matter, gravity, attractive_coeff, relativeSlowin
     element.vy *= retardation;
 }
 
+//[Brownian motion of Multiple particle](https://paleodyn.uni-bremen.de/study/Dyn2/dyn2script_SCM.pdf)
+function random_motion() { //to duplicate normal distribution
+    let a = 1 - Math.random()
+    let b = Math.random()
+    let Box_Muller = Math.sqrt(-2 * Math.log(a)) * Math.cos(2 * Math.PI * b); //makes normal distribution
+    return Box_Muller
+}
+function thermostat(particles, temp_target, friction_strength, time_step) {
+    const decay = 1 - friction_strength * time_step
+    const noise = Math.sqrt(temp_target * (1 - decay ** 2))
+    for (const k of particles) {
+        k.vx = k.vx * decay + noise * random_motion();
+        k.vy = k.vy * decay + noise * random_motion();
+    }
+}
+
 function repelMouse(element, mouseX, mouseY, repelForce, repelDistance) {
     let dx = mouseX - element.x;
     let dy = mouseY - element.y;
@@ -337,7 +353,7 @@ function mouseInteract(element, mouseX, mouseY, diameter) {
     let dx = element.x - mouseX
     let dy = element.y - mouseY
     let distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance < (diameter / 2)) {
+    if (distance < diameter) {
         return true
     }
     else {

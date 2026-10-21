@@ -58,6 +58,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [W3 Schools](<https://www.w3schools.com/>) Who doesn't use W3 schools?
 - [Youtube](https://www.youtube.com/) Random tutorials
 - [Lennard-Jones Potential](https://www.sciencedirect.com/topics/pharmacology-toxicology-and-pharmaceutical-science/lennard-jones-potential) For understanding the formula and logic for solid interaction of attraction.
+- [Brownian motion of Multiple particle](https://paleodyn.uni-bremen.de/study/Dyn2/dyn2script_SCM.pdf) For the thermostat code and understanding of Brownian Motion.
 
 ---
 

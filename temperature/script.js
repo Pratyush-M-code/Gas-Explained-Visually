@@ -7,18 +7,18 @@ function phase_transition_sim(p) {
         side = getCanvasSize(400, 'phase_transition_sim');
         p.createCanvas(side, side).parent('phase_transition_sim');
         diameter = 15;
-        matter = balls_init(40, side, 'phase_transition_sim');
+        matter = balls_block(60, side, 'phase_transition_sim', diameter);
         matter = balls_vrandom(matter, 0);
         view = Visible('phase_transition_sim')
         selected = null
 
         //slider
         temp.min = 0
-        temp.max = 100
-        temp.value = 50
+        temp.max = 200
+        temp.value = 20
         temp_readout.textContent = temp.value + ' K'
         temp.addEventListener('input', () => {
-            temp_readout.textContent = temp + ' K'
+            temp_readout.textContent = temp.value + ' K'
         })
     }
 
@@ -46,10 +46,10 @@ function phase_transition_sim(p) {
             i.oldVy = i.vy;
         }
 
-        let attraction = 10
-        let KE = 1.5 * temp.value
+        const T = Math.max(3 * (temp.value / 100) ** 2, 0.01)
+        thermostat(matter, T, 0.05, 1)
         for (let i of matter) {
-            updatematter(i, matter, 0, 1, 0.98, 0.999, 3, diameter)
+            updatematter(i, matter, 0.05, 1, 1, 1, 2, diameter)
         }
         for (let i of matter) {
             updateparticle(i, side, diameter, 0.8)
