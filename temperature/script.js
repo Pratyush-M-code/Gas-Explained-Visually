@@ -106,6 +106,12 @@ function internal_energy_sim(p) {
         checkcollision(matter, diameter)
         tempChange(matter, temp.value / 10, 0.3)
 
+        let ke = 0
+        for (const p of particles) {
+            ke += (p.vx * p.vx + p.vy * p.vy) / 2
+        }
+        internal_energy_readout.textContent = ke
+
         for (let i of matter) {
             updatefluid(i, matter, diameter, 0, 0.01, 1)
             updateparticle(i, side, diameter, 1)
