@@ -218,55 +218,6 @@ function updatefluid(element, fluid, diameter, gravity, attraction, retardation)
     element.vy *= retardation;
 }
 
-function updatesolid(element, solid, gravity, attraction, equilibriumDistance, relativeSlowing, retardation, maxSpeed, side, diameter) {
-    //gravity
-    element.vy += gravity
-
-    //attraction
-    const r0 = diameter + equilibriumDistance
-    const attractionDistance = 1.5 * (equilibriumDistance + diameter)
-    for (let j of solid) {
-        if (j === element) continue;
-
-        let dx = j.x - element.x;
-        let dy = j.y - element.y;
-        let distance = Math.sqrt(dx * dx + dy * dy)
-        let force = 0
-
-        if (distance === 0) continue;
-
-        if (distance < attractionDistance) {
-            force = attraction * (distance - r0) / (distance * distance);
-            if (distance < r0) force *= 3;
-        }
-        element.vx = element.vx + (force * (dx / distance))
-        element.vy = element.vy + (force * (dy / distance))
-    }
-
-
-    //speed bump
-    let speed = Math.hypot(element.vx, element.vy);
-    if (speed > maxSpeed) {
-        element.vx *= maxSpeed / speed;
-        element.vy *= maxSpeed / speed;
-    }
-
-    // relative energy loss
-    for (let j of solid) {
-        if (j === element) continue;
-        let dx = j.x - element.x;
-        let dy = j.y - element.y;
-        if (dx * dx + dy * dy < ((equilibriumDistance + diameter) * 1.5) ** 2) {
-            element.vx += (j.oldVx - element.oldVx) * (1 - relativeSlowing);
-            element.vy += (j.oldVy - element.oldVy) * (1 - relativeSlowing);
-        }
-    }
-
-    //energy loss
-    element.vx *= retardation;
-    element.vy *= retardation;
-}
-
 function updatematter(element, matter, gravity, attractive_coeff, relativeSlowing, retardation, maxForce, diameter) {
     //gravity
     element.vy += gravity
@@ -323,6 +274,45 @@ function thermostat(particles, temp_target, friction_strength, time_step) {
         k.vx = k.vx * decay + noise * random_motion();
         k.vy = k.vy * decay + noise * random_motion();
     }
+}
+
+function tempChange(particles, temp_target, strength) {
+    let ke = 0
+    for (const p of particles) {
+        ke += (p.vx * p.vx + p.vy * p.vy) / 2
+    }
+
+    const temp_now = Math.max(ke / particles.length, 1e-6)
+    const scale = 1 + strength * (Math.sqrt(temp_target / temp_now) - 1)
+
+    for (const p of particles) {
+        p.vx *= scale
+        p.vy *= scale
+    }
+}
+
+function bgTempChange(particles, strength) {
+    let ke = 0
+    let old_ke = 0
+    for (const p of particles) ke += (p.vx * p.vx + p.vy * p.vy) / 2
+    const temp_now = Math.max(ke / particles.length, 1e-6)
+    for (const p of particles) old_ke += (p.oldVx * p.oldVx + p.oldVy * p.oldVy) / 2
+    const temp_old = Math.max(old_ke / particles.length, 1e-6)
+
+    let temp_diff = Math.abs(temp_now - temp_old)
+    let heating = ((temp_now - temp_old) > 0) ? 1 : 0
+    let baseColor = [167, 167, 167]
+
+    if (heating === 1) {
+        const change = 88 * Math.tanh(strength * temp_diff / temp_old)
+        baseColor = [167 + change, 167, 167]
+    }
+    if (heating === 0) {
+        const change = 88 * Math.tanh(strength * temp_diff / temp_old)
+        baseColor = [167, 167, 167 + change]
+    }
+
+    return baseColor
 }
 
 function repelMouse(element, mouseX, mouseY, repelForce, repelDistance) {

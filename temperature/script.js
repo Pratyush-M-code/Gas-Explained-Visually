@@ -41,6 +41,7 @@ function phase_transition_sim(p) {
         if (!view.visible) return
 
         p.background(p.color('#a7a7a7'));
+
         for (let i of matter) {
             i.oldVx = i.vx;
             i.oldVy = i.vy;
@@ -67,7 +68,7 @@ function phase_transition_sim(p) {
 }
 
 function internal_energy_sim(p) {
-    let side, diameter, matter, view;
+    let side, diameter, matter, view, selected;
     const temp = document.getElementById('temp-internal-energy')
     const internal_energy_readout = document.getElementById('internal_energy_readout')
     const temp_readout = document.getElementById('temp_internal_energy_readout')
@@ -79,6 +80,17 @@ function internal_energy_sim(p) {
         matter = balls_init(100, side, 'internal_energy_sim');
         matter = balls_vrandom(matter, 200);
         view = Visible('internal_energy_sim')
+        selected = null
+
+        //slider
+        temp.min = 0
+        temp.max = 200
+        temp.value = 20
+        temp_readout.textContent = temp.value + ' K'
+        temp.addEventListener('input', () => {
+            temp_readout.textContent = temp.value + ' K'
+        })
+
     }
 
     p.draw = function () {
@@ -86,7 +98,13 @@ function internal_energy_sim(p) {
 
         p.background(p.color('#a7a7a7'));
 
+        for (let i of matter) {
+            i.oldVx = i.vx;
+            i.oldVy = i.vy;
+        }
+
         checkcollision(matter, diameter)
+        tempChange(matter, temp.value / 10, 0.3)
 
         for (let i of matter) {
             updatefluid(i, matter, diameter, 0, 0.01, 1)
@@ -99,7 +117,7 @@ function internal_energy_sim(p) {
 }
 
 function temp_change_sim(p) {
-    let side, diameter, matter, view;
+    let side, diameter, matter, view, current_temp = 0;
     const temp = document.getElementById('temp-change')
     let temp_readout = document.getElementById('temp-change-readout')
 
@@ -107,28 +125,47 @@ function temp_change_sim(p) {
         side = getCanvasSize(400, 'temp_change_sim');
         p.createCanvas(side, side).parent('temp_change_sim');
         diameter = 5;
+
+        temp.min = 0
+        temp.max = 200
+        temp.value = 20
+        current_temp = Number(temp.value) / 40
+
         matter = balls_init(100, side, 'temp_change_sim');
-        matter = balls_vrandom(matter, 200);
+        matter = balls_vrandom(matter, matter.length * current_temp)   // start at the slider's T
         view = Visible('temp_change_sim')
+
+        temp_readout.textContent = temp.value + ' K'
+        temp.addEventListener('input', () => {
+            temp_readout.textContent = temp.value + ' K'
+        })
     }
 
     p.draw = function () {
         if (!view.visible) return
 
-        p.background(p.color('#a7a7a7'));
-
         checkcollision(matter, diameter)
 
         for (let i of matter) {
-            updatefluid(i, matter, diameter, 0, 0.01, 1)
-            updateparticle(i, side, diameter, 1)
-            p.fill("black");
-            p.noStroke()
-            p.circle(i.x, i.y, diameter - 0.1)
+            i.oldVx = i.vx;
+            i.oldVy = i.vy;
         }
+
+        current_temp += (((Number(temp.value) / 40) - current_temp) / 5)
+        tempChange(matter, current_temp, 0.3)          // once per frame, not per particle
+
+        for (let i of matter) {
+            updatefluid(i, matter, diameter, 0, 0.01, 1);
+            updateparticle(i, side, diameter, 1);
+        }
+
+        p.background(...bgTempChange(matter, 5))       // after the update, before drawing
+
+        p.fill("black");
+        p.noStroke();
+        for (let i of matter) p.circle(i.x, i.y, diameter - 0.1);
     }
 }
-
 
 new p5(phase_transition_sim);
 new p5(internal_energy_sim);

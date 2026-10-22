@@ -30,6 +30,12 @@ This project to to help explain the different gaseous laws and their relations i
 - Pressure graph + Gas Sim
 - Gas Simuation (Colour coded for each wall)
 
+### Temperature
+
+- Brownian Motion of temperature sim
+- Kinetic Energy Sim
+- Explaining how future temperature simulations will work
+
 ## Usage
 
 [Click Me!](https://pratyush-m-code.github.io/Gas-Explained-Visually/)
