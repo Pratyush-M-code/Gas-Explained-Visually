@@ -106,6 +106,8 @@ p {
     display: flex;
     flex-direction: column-reverse;
     touch-action: none;
+    justify-content: center;
+    align-content: center;
 }
 
 canvas {
