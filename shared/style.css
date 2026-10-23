@@ -133,7 +133,26 @@ canvas {
 #pressure_graph {
     touch-action: auto;
     max-width: 100%;
-    border: 2px, solid, var(--border)
+    border: 2px solid var(--border);
+}
+
+table {
+    border: 1px solid var(--border);
+    width: 100%;
+}
+
+#tableContent {
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+
+th {
+    border: 1px solid var(--border);
+}
+
+td {
+    border: 1px solid var(--border);
 }
 
 input {
