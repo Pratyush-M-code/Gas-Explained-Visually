@@ -5,7 +5,7 @@ function vol_solid_sim(p) {
         side = getCanvasSize(400, 'solid_sim');
         p.createCanvas(side, side).parent('solid_sim');
         diameter = 25;
-        solid = balls_block(64, side, 'solid_sim', diameter);
+        solid = balls_init(64, side, 'solid_sim', undefined, diameter / 2);
         solid = balls_vrandom(solid, 100);
         selected = null
         view = Visible('solid_sim')

@@ -21,7 +21,7 @@ function Visible(containerId) {
     return userViewing
 }
 
-function balls_init(n_balls, canvas_size, containerId) {
+function balls_init(nballs, canvasSize, containerId, spacing = undefined, offset = undefined) {
 
     const container = document.getElementById(containerId)
     let available
@@ -31,63 +31,28 @@ function balls_init(n_balls, canvas_size, containerId) {
     else {
         available = window.innerWidth * 0.9
     }
-    let proportional_balls = n_balls * ((available / 400) ** 2)
-    n_balls = Math.min(n_balls, proportional_balls)
+    let proportionalballs = nballs * ((available / 400) ** 2)
+    nballs = Math.min(nballs, proportionalballs)
 
-    let particles = [];
-    const rows = Math.ceil(n_balls / Math.sqrt(n_balls))
-    const spacing = Math.round(canvas_size / (rows + 1))
+    let particles = []
+    const rows = Math.ceil(nballs / Math.sqrt(nballs))
+    spacing = (spacing === undefined) ? Math.round(canvasSize / (rows + 1)) : spacing
     let posx = 0
     let index = 0
+    offset = (offset === undefined) ? 0 : offset
+
     for (let x = 0; x < rows; x++) {
-        posx = posx + spacing
+        posx = (x % 2 == 0) ? posx + spacing : posx + spacing + offset
         let posy = 0
         for (let y = 0; y < rows; y++) {
             posy = posy + spacing
             particles.push({ x: posx, y: posy, vx: 0, vy: 0 })
             index = index + 1
-            if (index >= n_balls) {
+            if (index >= nballs) {
                 return particles
             }
         }
-        if (index >= n_balls) {
-            return particles
-        }
-    }
-    return particles
-}
-
-function balls_block(n_balls, canvas_size, containerId, diameter) {
-
-    const container = document.getElementById(containerId)
-    let available
-    if (container && container.clientWidth > 0) {
-        available = container.clientWidth
-    }
-    else {
-        available = window.innerWidth * 0.9
-    }
-    const proportional_balls = (n_balls * available ** 2) / (400 ** 2)
-    n_balls = Math.min(n_balls, proportional_balls)
-
-    let particles = [];
-    const rows = Math.ceil(n_balls / Math.sqrt(n_balls))
-    const spacing = Math.round(diameter * 1.25)
-    let space = (n_balls / rows) * spacing
-    let posx = (canvas_size - (rows - 1) * spacing) / 2 - spacing
-    let index = 0
-    for (let x = 0; x < rows; x++) {
-        posx = posx + spacing
-        let posy = (canvas_size - (rows - 1) * spacing) / 2 - spacing
-        for (let y = 0; y < rows; y++) {
-            posy = posy + spacing
-            particles.push({ x: posx, y: posy, vx: 0, vy: 0 })
-            index = index + 1
-            if (index >= n_balls) {
-                return particles
-            }
-        }
-        if (index >= n_balls) {
+        if (index >= nballs) {
             return particles
         }
     }

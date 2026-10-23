@@ -7,7 +7,7 @@ function phase_transition_sim(p) {
         side = getCanvasSize(400, 'phase_transition_sim');
         p.createCanvas(side, side).parent('phase_transition_sim');
         diameter = 15;
-        matter = balls_block(60, side, 'phase_transition_sim', diameter);
+        matter = balls_init(60, side, 'phase_transition_sim', diameter, diameter / 2);
         matter = balls_vrandom(matter, 0);
         view = Visible('phase_transition_sim')
         selected = null
@@ -107,7 +107,7 @@ function internal_energy_sim(p) {
         tempChange(matter, temp.value / 10, 0.3)
 
         let ke = 0
-        for (const p of particles) {
+        for (const p of matter) {
             ke += (p.vx * p.vx + p.vy * p.vy) / 2
         }
         internal_energy_readout.textContent = ke
