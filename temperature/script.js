@@ -42,11 +42,6 @@ function phase_transition_sim(p) {
 
         p.background(p.color('#a7a7a7'));
 
-        for (let i of matter) {
-            i.oldVx = i.vx;
-            i.oldVy = i.vy;
-        }
-
         const T = Math.max(3 * (temp.value / 100) ** 2, 0.01)
         thermostat(matter, T, 0.05, 1)
         for (let i of matter) {
@@ -98,11 +93,6 @@ function internal_energy_sim(p) {
 
         p.background(p.color('#a7a7a7'));
 
-        for (let i of matter) {
-            i.oldVx = i.vx;
-            i.oldVy = i.vy;
-        }
-
         checkcollision(matter, diameter)
         tempChange(matter, temp.value / 10, 0.3)
 
@@ -152,10 +142,6 @@ function temp_change_sim(p) {
 
         checkcollision(matter, diameter)
 
-        for (let i of matter) {
-            i.oldVx = i.vx;
-            i.oldVy = i.vy;
-        }
 
         current_temp += (((Number(temp.value) / 40) - current_temp) / 5)
         tempChange(matter, current_temp, 0.3)          // once per frame, not per particle

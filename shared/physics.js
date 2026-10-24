@@ -21,6 +21,7 @@ function Visible(containerId) {
     return userViewing
 }
 
+//Use in p.setup() to create balls array and set their initial positions
 function balls_init(nballs, canvasSize, containerId, spacing = undefined, offset = undefined) {
 
     const container = document.getElementById(containerId)
@@ -59,6 +60,7 @@ function balls_init(nballs, canvasSize, containerId, spacing = undefined, offset
     return particles
 }
 
+// Use in p.setup() to give particles array intital velocity on the basis of kinetic energy
 function balls_vrandom(particles, KE) {
     let total = 0, avgx = 0, avgy = 0;
 
@@ -86,6 +88,8 @@ function balls_vrandom(particles, KE) {
     for (let p of particles) {
         p.vx *= scale;
         p.vy *= scale;
+        p.oldVx = p.vx
+        p.oldVy = p.vy
     }
     return particles;
 }
@@ -109,6 +113,8 @@ function updateparticle(element, canvas_size, diameter, elasticity, wallposX = c
         element.y = canvas_size - diameter / 2;
         element.vy *= -elasticity;
     }
+    element.oldVx = element.vx;
+    element.oldVy = element.vy;
 }
 
 function checkcollision(particleList, diameter) {
@@ -196,7 +202,7 @@ function updatematter(element, matter, gravity, attractive_coeff, relativeSlowin
         let dx = j.x - element.x;
         let dy = j.y - element.y;
         let distance_sq = dx * dx + dy * dy;
-        if (distance_sq === 0 || distance_sq > distance_cutoff_sq) {
+        if (distance_sq === 0 || distance_sq > distance_cutoff_sq || j === element) {
             continue
         }
         let distance_clamp_sq = Math.max(distance_sq, (s ** 2))
@@ -208,16 +214,23 @@ function updatematter(element, matter, gravity, attractive_coeff, relativeSlowin
         element.vy -= force * dy
     }
 
-    // relative energy loss
     const relative_energy = Math.pow(2, 1 / 6) * s
+    let sum_dy = 0
+    let sum_dx = 0
+    let neighborCount = 0
     for (let j of matter) {
         if (j === element) continue
         const dx = j.x - element.x
         const dy = j.y - element.y
         if (dx * dx + dy * dy < (1.5 * relative_energy) ** 2) {
-            element.vx += (j.oldVx - element.oldVx) * (1 - relativeSlowing)
-            element.vy += (j.oldVy - element.oldVy) * (1 - relativeSlowing)
+            sum_dx += (j.oldVx - element.oldVx) * (1 - relativeSlowing)
+            sum_dy += (j.oldVy - element.oldVy) * (1 - relativeSlowing)
+            neighborCount++
         }
+    }
+    if (neighborCount > 0) {
+        element.vx += (sum_dx / neighborCount) * (1 - relativeSlowing)
+        element.vy += (sum_dy / neighborCount) * (1 - relativeSlowing)
     }
 
     //energy loss
@@ -280,23 +293,11 @@ function bgTempChange(particles, strength) {
     return baseColor
 }
 
-function repelMouse(element, mouseX, mouseY, repelForce, repelDistance) {
-    let dx = mouseX - element.x;
-    let dy = mouseY - element.y;
-    let distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance > 0 && distance < repelDistance) {
-        let angle = Math.atan2(dy, dx);
-        let force = repelForce / Math.max((distance * distance), 25);
-        element.vx -= force * Math.cos(angle);
-        element.vy -= force * Math.sin(angle);
-    }
-}
-
 function attractMouse(element, mouseX, mouseY, attractForce, attractDistance, maxAttraction = 25) {
     let dx = mouseX - element.x;
     let dy = mouseY - element.y;
     let distance = Math.sqrt(dx * dx + dy * dy);
-    if (distance > 0 && distance < attractDistance) {
+    if (distance > 0 && (attractForce > 0 ? distance < attractDistance : distance > attractDistance)) {
         let angle = Math.atan2(dy, dx);
         let force = attractForce / Math.max((distance * distance), maxAttraction);
         element.vx += force * Math.cos(angle);
@@ -314,6 +315,26 @@ function mouseInteract(element, mouseX, mouseY, diameter) {
     else {
         return false
     }
+}
+
+function drawVector(p, x1, y1, x2, y2) {
+    const dx = x1 - x2
+    const dy = y1 - y2
+    const distance = Math.sqrt(dx ** 2 + dy ** 2)
+    const cos_theta = dx / distance
+    const sine_theta = dy / distance
+
+    const arrow_x = (x2 + 5 * x1) / 6
+    const arrow_y = (y2 + 5 * y1) / 6
+    const r = (distance / 10)
+    const arrow_x1 = arrow_x + r * -sine_theta
+    const arrow_x2 = arrow_x - r * -sine_theta
+    const arrow_y1 = arrow_y + r * cos_theta
+    const arrow_y2 = arrow_y - r * cos_theta
+
+    p.triangle(x1, y1, arrow_x1, arrow_y1, arrow_x2, arrow_y2)
+    p.strokeWeight(r / 5)
+    p.line(x1, y1, x2, y2)
 }
 
 function applyForce(element, mouseX, mouseY, diameter, forceMultiplier, maxForce) {
