@@ -158,37 +158,6 @@ function checkcollision(particleList, diameter) {
     }
 }
 
-function updatefluid(element, fluid, diameter, gravity, attraction, retardation) {
-    //gravity
-    element.vy += gravity
-
-    //attraction + repulsion
-    for (let j of fluid) {
-        if (j === element) continue;
-
-        let dx = j.x - element.x;
-        let dy = j.y - element.y;
-        let distance = Math.sqrt(dx * dx + dy * dy)
-
-        if (distance === 0) continue;
-
-        if (distance > diameter) {
-            let force = attraction / Math.max(distance * distance, 64)
-            element.vx = element.vx + (force * (dx / distance))
-            element.vy = element.vy + (force * (dy / distance))
-        }
-        if (distance < diameter) {
-            let force = -(attraction / 2) / Math.max(distance * distance, 64)
-            element.vx = element.vx + (force * (dx / distance))
-            element.vy = element.vy + (force * (dy / distance))
-        }
-    }
-
-    //energy loss
-    element.vx *= retardation;
-    element.vy *= retardation;
-}
-
 function updatematter(element, matter, gravity, attractive_coeff, relativeSlowing, retardation, maxForce, diameter) {
     //gravity
     element.vy += gravity

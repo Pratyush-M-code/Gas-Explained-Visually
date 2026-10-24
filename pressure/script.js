@@ -1,18 +1,20 @@
 function pressure_intro_sim(p) {
-    let side, shape, view;
+    let side, shape, view
 
     p.setup = async function () {
-        side = getCanvasSize(400, 'intro_sim');
-        p.createCanvas(side, side, p.WEBGL).parent('intro_sim');
+        //Setting up Initail values
+        side = getCanvasSize(400, 'intro_sim')
         view = Visible('intro_sim')
-
         //3d shape logic
         shape = await p.loadModel('../shared/assets/3d-intro-sim.obj', true)
+
+        p.createCanvas(side, side, p.WEBGL).parent('intro_sim')
     }
 
     p.draw = function () {
         if (!view.visible) return
         if (!shape) return
+
         p.background(p.color('#a7a7a7'));
         p.orbitControl();
 
@@ -41,11 +43,12 @@ function pressure_wall_sim(p) {
 
 
     p.setup = function () {
+        // Setting up Initial Conditions
         side = getCanvasSize(400, 'wall_sim');
-        p.createCanvas(side, side).parent('wall_sim');
         view = Visible('wall_sim')
-
         diameter = 10;
+
+        p.createCanvas(side, side).parent('wall_sim');
         gas = balls_init(70, side, 'wall_sim');
         gas = balls_vrandom(gas, 200);
         area_readout.textContent = side + ' px'
@@ -62,16 +65,18 @@ function pressure_wall_sim(p) {
 
         for (let i of gas) {
             attractMouse(i, p.mouseX, p.mouseY, 100, 50)
-            updatefluid(i, gas, diameter, 0, 0.01, 1)
+            updatematter(i, gas, 0, 0, 1, 1, 1, diameter)
 
             if (i.x + i.vx + diameter / 2 > side) {
                 impulse += 2 * Math.abs(i.vx);
             }
+        }
 
+        for (let i of gas) {
             updateparticle(i, side, diameter, 1)
 
             if (Math.abs(i.vy) < Math.abs(i.vx) && i.vx > 0) {
-                p.fill("black");
+                p.fill("#000000");
                 p.noStroke()
             }
             else {
@@ -146,14 +151,16 @@ function pressure_total_sim(p) {
     const avg_total_pressure_readout = document.getElementById('avg_total_pressure_readout')
 
     p.setup = function () {
+        // Setting up Initial Values
         side = getCanvasSize(400, 'total_sim');
-        p.createCanvas(side, side).parent('total_sim');
-        diameter = 8;
-        gas = balls_init(100, side, 'total_sim');
-        gas = balls_vrandom(gas, 200);
         view = Visible('total_sim')
+        diameter = 8;
         n = 0
         pressureSum = 0
+
+        p.createCanvas(side, side).parent('total_sim');
+        gas = balls_init(100, side, 'total_sim');
+        gas = balls_vrandom(gas, 200);
     }
 
     p.draw = function () {
@@ -163,69 +170,53 @@ function pressure_total_sim(p) {
 
         checkcollision(gas, diameter)
 
+        for (let i of gas) {
+            updatematter(i, gas, 0, 0, 1, 1, 1, diameter)
 
+            impulse += (i.x + i.vx + diameter / 2 > side) ? (2 * Math.abs(i.vx)) : 0
+            impulse += (i.x + i.vx + diameter / 2 < 0) ? (2 * Math.abs(i.vx)) : 0
+            impulse += (i.y + i.vy + diameter / 2 > side) ? (2 * Math.abs(i.vy)) : 0
+            impulse += (i.y + i.vy + diameter / 2 < 0) ? (2 * Math.abs(i.vy)) : 0
+        }
 
         for (let i of gas) {
-            updatefluid(i, gas, diameter, 0, 0.01, 1)
-
-            if (i.x + i.vx + diameter / 2 > side) {
-                impulse += 2 * Math.abs(i.vx);
-            }
-            if (i.x + i.vx + diameter / 2 < 0) {
-                impulse += 2 * Math.abs(i.vx);
-            }
-            if (i.y + i.vy + diameter / 2 < 0) {
-                impulse += 2 * Math.abs(i.vy);
-            }
-            if (i.y + i.vy + diameter / 2 > side) {
-                impulse += 2 * Math.abs(i.vy);
-            }
-
             updateparticle(i, side, diameter, 1)
 
             if (p.mouseIsPressed) {
                 attractMouse(i, p.mouseX, p.mouseY, 100, 200, 25)
             }
 
+            let colour_ball = " "
+
             if (Math.abs(i.vx) > Math.abs(i.vy) && i.vx < 0) {
-                p.fill("red");
-                p.noStroke()
+                colour_ball = "red"
+            }
+            else if (Math.abs(i.vx) > Math.abs(i.vy) && i.vx > 0) {
+                colour_ball = "blue"
+            }
+            else if (Math.abs(i.vy) > Math.abs(i.vx) && i.vy < 0) {
+                colour_ball = "green"
+            }
+            else if (Math.abs(i.vy) > Math.abs(i.vx) && i.vy > 0) {
+                colour_ball = "yellow"
             }
             else {
-                if (Math.abs(i.vx) > Math.abs(i.vy) && i.vx > 0) {
-                    p.fill("blue");
-                    p.noStroke()
-                }
-                else {
-                    if (Math.abs(i.vy) > Math.abs(i.vx) && i.vy < 0) {
-                        p.fill("green");
-                        p.noStroke()
-                    }
-                    else {
-                        if (Math.abs(i.vy) > Math.abs(i.vx) && i.vy > 0) {
-                            p.fill("yellow");
-                            p.noStroke()
-                        }
-                        else {
-                            p.fill("black")
-                            p.noStroke()
-                        }
-                    }
-                }
+                colour_ball = "black"
             }
+
+            p.fill(colour_ball)
+            p.noStroke()
             p.circle(i.x, i.y, diameter - 0.1)
         }
-        p.stroke("red");
+
         p.strokeWeight(7)
+        p.stroke("red");
         p.line(0, 0, 0, side)
         p.stroke("blue");
-        p.strokeWeight(7)
         p.line(side, 0, side, side)
         p.stroke("green");
-        p.strokeWeight(7)
         p.line(0, 0, side, 0)
         p.stroke("yellow");
-        p.strokeWeight(7)
         p.line(0, side, side, side)
 
         //output
@@ -234,10 +225,7 @@ function pressure_total_sim(p) {
             pressure = force / (4 * side);
             total_pressure_readout.textContent = pressure.toFixed(4)
 
-            impulse = 0;
-            frames = 0;
-            pressureSum += pressure;
-            n++;
+            impulse = 0; frames = 0; pressureSum += pressure; n++;
             avgPressure = pressureSum / n;
             avg_total_pressure_readout.textContent = avgPressure.toFixed(4);
         }
