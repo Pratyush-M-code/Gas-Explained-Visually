@@ -36,6 +36,12 @@ This project to to help explain the different gaseous laws and their relations i
 - Kinetic Energy Sim
 - Explaining how future temperature simulations will work
 
+### Physics Engine
+
+- Update Matter, uses [Lennard-Jones Potential](https://www.sciencedirect.com/topics/pharmacology-toxicology-and-pharmaceutical-science/lennard-jones-potential) the to completly revamp attraction between the particles and also to replicate liquid, gases and solid.
+- random_motion & thermostat uses [Brownian motion of Multiple particle](https://paleodyn.uni-bremen.de/study/Dyn2/dyn2script_SCM.pdf) to calculate Brownian Motion and their temperatures!
+- Right now, there is more to come! But, as of now these are the scientific principals I have used.
+
 ## Usage
 
 [Click Me!](https://pratyush-m-code.github.io/Gas-Explained-Visually/)
