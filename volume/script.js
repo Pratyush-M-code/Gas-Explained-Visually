@@ -38,6 +38,7 @@ function vol_solid_sim(p) {
         for (let i of solid) {
             updatematter(i, solid, 0, 3, 0.9, 0.9, Infinity, diameter)
         }
+        checkcollision(solid, diameter)
 
         for (let i of solid) {
             updateparticle(i, side, diameter, 0.8)

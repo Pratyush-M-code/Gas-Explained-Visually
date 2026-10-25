@@ -44,7 +44,7 @@ header {
     padding: 1vh 5vw;
 }
 
-footer {
+#individual-navigation {
     background-color: var(--footer);
     width: 100%;
     display: flex;
@@ -197,8 +197,13 @@ label {
 }
 
 .site-footer {
+    background-color: var(--footer);
     width: 100%;
     padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     text-align: center;
 }
 
