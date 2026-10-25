@@ -116,6 +116,31 @@ canvas {
     border: 5px solid var(--border);
 }
 
+.canvas.sample {
+    position: relative;
+    overflow: hidden;
+}
+
+.canvas.sample::after {
+    content: attr(data-label);
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: #ffffff;
+    font-family: var(--heading);
+    font-size: 1.25rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.canvas.sample:hover::after {
+    opacity: 1;
+}
+
 #solid_sim canvas {
     cursor: grab;
 }

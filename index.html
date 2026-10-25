@@ -15,6 +15,10 @@
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.3/p5.min.js"></script>
+    <script src="shared/physics.js"></script>
+    <script src="home/script.js"></script>
 </head>
 
 <body>
@@ -23,24 +27,47 @@
     </header>
 
     <main>
-        <div id="intro">
-            <h1>Welcome to My Website</h1>
+        <div id="intro" class="content">
+            <h1>Welcome to Gas Explained Visually!</h1>
+            <p>More often than not, many of us learn these laws by rote memorization, without ever seeing how the
+                substances and gases actually interact in reality. We never develop an intuitive feel for these
+                processes. <br>
+                So to help with that, I've built this website to give people a more concise and intuitive
+                understanding of the laws that govern our world. This series focuses on the Gaseous State and
+                Thermodynamics.</p>
         </div>
-        <div id="explain">
-            <h2></h2>
+        <div id="explain" class="content">
+            <h2>How to use this website?</h2>
+            <p>This is inspired by <a href="https://manytinythings.github.io/">Many Tiny Things</a> and is mostly meant
+                to be read in a page-by-page format, with navigation at the bottom. However, each page is also a
+                standalone simulation and introduces new topics and ideas. As always, this is an intentionally
+                simplified approach to simulations. Many of the units used, like Kelvin, Joules etc., may not exactly
+                correlate to their real-world counterparts, but the ideas and intuition remain the same! <br>
+                Down below is a gallery of all the pages, and it will be updated as I work on them!
+            </p>
         </div>
-        <div id="navigation">
-            <nav>
+        <div id="navigation" class="content" style="display: flex; flex-direction: column; flex-wrap: wrap;">
+            <nav style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 1rem;">
                 <a href="volume/volume.html" rel="noopener noreferrer" aria-label="Volume">
-                    <p>Volume</p>
+                    <div id="volume_sim" class="canvas sample" data-label="Volume" style="width: 43vw; height: 43vw;">
+                    </div>
                 </a>
                 <a href="pressure/pressure.html" rel="noopener noreferrer" aria-label="Pressure">
-                    <p>Pressure</p>
+                    <div id="pressure_sim" class="canvas sample" data-label="Pressure"
+                        style="width: 43vw; height: 43vw;"></div>
                 </a>
                 <a href="temperature/temperature.html" rel="noopener noreferrer" aria-label="Temperature">
-                    <p>Temperature</p>
+                    <div id="temperature_sim" class="canvas sample" data-label="Temperature"
+                        style="width: 43vw; height: 43vw;"></div>
                 </a>
             </nav>
+        </div>
+        <div id="github" class="content">
+            <a href="https://github.com/Pratyush-M-code/Gas-Explained-Visually">
+                <h2>GitHub Repo!</h2>
+            </a>
+            <p>Check out the github repo! Find out the science I used to build this project and all future topics that
+                I'm gonna cover!</p>
         </div>
     </main>
 
@@ -60,7 +87,7 @@
         </div>
         <p class="footer-credit"> Made with ❤ by Pratyush M </p>
     </footer>
-    <script src="shared/physics.js"></script>
+
 </body>
 
 </html>
