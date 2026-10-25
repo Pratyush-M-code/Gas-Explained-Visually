@@ -25,7 +25,7 @@ This project to to help explain the different gaseous laws and their relations i
 
 ### Volume
 
-- A soft body solid sim that is draggable
+- A soft body solid sim that is draggable + Maths (Check Desmos!)
 - An interactive liquid sim that has variable container width
 - An interactive gas sim with variable container size
 
