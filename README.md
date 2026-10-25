@@ -15,6 +15,7 @@ This project to to help explain the different gaseous laws and their relations i
 
 ### Home
 
+- Why I'm making this project
 - Links for each page.
 - Forever a WIP
 
@@ -43,6 +44,7 @@ This project to to help explain the different gaseous laws and their relations i
 ### Physics Engine
 
 - Update Matter, uses [Lennard-Jones Potential](https://www.sciencedirect.com/topics/pharmacology-toxicology-and-pharmaceutical-science/lennard-jones-potential) the to completly revamp attraction between the particles and also to replicate liquid, gases and solid.
+![Desmos graph of how this works!](https://www.desmos.com/calculator/0umqgghqjf)
 - random_motion & thermostat uses [Brownian motion of Multiple particle](https://paleodyn.uni-bremen.de/study/Dyn2/dyn2script_SCM.pdf) to calculate Brownian Motion and their temperatures!
 - Right now, there is more to come! But, as of now these are the scientific principals I have used.
 
@@ -52,7 +54,7 @@ This project to to help explain the different gaseous laws and their relations i
 
 ## Screenshots
 
-![Screenshot](https://via.placeholder.com/800x400?text=Screenshot)
+![Screenshot](https://pratyush-m-code.github.io/Gas-Explained-Visually/shared/assets/Demo_screenshot.png)
 
 ## FAQ
 
