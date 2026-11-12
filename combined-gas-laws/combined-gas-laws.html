@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combined Gas Laws</title>
+    <link rel="stylesheet" href="../shared/style.css">
+    <link rel="icon" type="image/x-icon" href="../shared/assets/404.png">
+
+    <link rel=" preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/p5@2.3.4/lib/p5.min.js"></script>
+    <script src="../shared/physics.js"></script>
+</head>
+
+<body>
+    <header>
+        <h1>Combined Gas Laws</h1>
+    </header>
+    <main>
+        <div class="content">
+            <div class="text">
+                <h2>Boyle's Law</h2>
+                <p>Boyle's law states that the volume of a given mass of gas varies inversely with the pressure when the
+                    temperature is kept constant. An inverse relationship is described in this way. As one variable
+                    increases in value, the other variable decreases.</p>
+            </div>
+            <div class="canvas" id="boyle_law_sim" role="img" aria-label="A simulation to explain Boyle's Law.">
+                <!-- The canvas will be created here by p5.js -->
+                <div>
+                    <label for="boyle-law-pressure">
+                        <p>Pressure: <output id="boyle-law-pressure-readout"></output></p>
+                    </label>
+                </div>
+                <div>
+                    <label for="boyle-law-volume">
+                        <p>Volume: <output id="boyle-law-volume-readout"></output></p>
+                    </label>
+                    <input type="range" id="boyle-law-volume" aria-label="Volume">
+                </div>
+            </div>
+        </div>
+        <div class="content">
+            <div class="text">
+                <h2>Charles's Law</h2>
+                <p>Charles's Law states that the volume of a given mass of gas varies directly with the absolute
+                    temperature of the gas when pressure is kept constant. The absolute temperature is temperature
+                    measured with the Kelvin scale. The Kelvin scale must be used because zero on the Kelvin scale
+                    corresponds to a complete stoppage of molecular motion.</p>
+            </div>
+            <div class="canvas" id="charles_law_sim" role="img" aria-label="A simulation to explain Charles's Law.">
+                <!-- The canvas will be created here by p5.js -->
+                <div>
+                    <label for="charles-law-temperature">
+                        <p>Temperature: <output id="charles-law-temperature-readout"></output></p>
+                    </label>
+                </div>
+                <div>
+                    <label for="charles-law-volume">
+                        <p>Volume: <output id="charles-law-volume-readout"></output></p>
+                    </label>
+                    <input type="range" id="charles-law-volume" aria-label="Volume">
+                </div>
+            </div>
+        </div>
+        <div class="content">
+            <div class="text">
+                <h2>Gay-Lussac's Law</h2>
+                <p>Gay-Lussac's Law states that the pressure of a given mass of gas varies directly with the absolute
+                    temperature of the gas, when the volume is kept constant. Gay-Lussac's Law is very similar to
+                    Charles's Law, with the only difference being the type of container. Whereas the container in a
+                    Charles's Law experiment is flexible, it is rigid in a Gay-Lussac's Law experiment.</p>
+            </div>
+            <div class="canvas" id="gay_lussac_law_sim" role="img"
+                aria-label="A simulation to explain Gay-Lussac's Law.">
+                <!-- The canvas will be created here by p5.js -->
+                <div>
+                    <label for="gay-lussac-law-pressure">
+                        <p>Pressure: <output id="gay-lussac-law-pressure-readout"></output></p>
+                    </label>
+                </div>
+                <div>
+                    <label for="gay-lussac-law-temperature">
+                        <p>Temperature: <output id="gay-lussac-law-temperature-readout"></output></p>
+                    </label>
+                    <input type="range" id="gay-lussac-law-temperature" aria-label="Temperature">
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer id="individual-navigation">
+        <div class="navigation" id="back">
+            <nav>
+                <a href="../index.html" rel="noopener noreferrer" aria-label="Home">
+                    <h2>Back to Previous Page</h2>
+                    <p>Home</p>
+                </a>
+            </nav>
+        </div>
+        <div class="navigation" style="align-items: center;">
+            <h1 style="text-align: center;">Navigation</h1>
+        </div>
+        <div class="navigation" id="next">
+            <nav>
+                <a href="../404.html" rel="noopener noreferrer" aria-label="WIP">
+                    <h2>Onward to Next Page</h2>
+                    <p>WIP</p>
+                </a>
+            </nav>
+        </div>
+        <!-- navigation to next site -->
+    </footer>
+    <script src="script.js"></script>
+</body>
+
+</html>
