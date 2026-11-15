@@ -21,7 +21,7 @@ function Visible(containerId) {
     return userViewing
 }
 
-//Use in p.setup() to create balls array and set their initial positions
+//Use in p.setup() to create balls array and set their initial positions also this is extermely buggy, it is better to leave last 2 parameters empty
 function balls_init(nballs, canvasSize, containerId, spacing = undefined, offset = undefined) {
 
     const container = document.getElementById(containerId)
