@@ -85,10 +85,9 @@ function boyle_law_sim(p) {
 function charles_law_sim(p) {
     let side, diameter, matter, view, selected, target, border, plunger;
 
-    let state_temperature = { impulse: 0, frames: 0, pressureSum: 0, n: 0, iteration_counter: 30 };
     const volume_readout = document.getElementById('charles-law-volume-readout')
 
-    let min_side, currentWall = 0
+    let T0, forceExt, startPos
     const temperature = document.getElementById('charles-law-temperature')
     const temperature_readout = document.getElementById('charles-law-temperature-readout')
 
@@ -108,18 +107,17 @@ function charles_law_sim(p) {
         temperature.max = 15
         temperature.min = 2
         temperature.value = 5
-        const T0 = temperature.value * 20
+        T0 = temperature.value * 20
         temperature_readout.textContent = T0 + ' K'
         temperature.addEventListener('input', () => {
             temperature_readout.textContent = temperature.value * 20 + ' K'
         })
 
         matter = balls_vrandom(matter, matter.length * T0)
-        const Tmax = temperature.max * 20
 
         //plunger
-        const forceExt = 2
-        const startPos = (side - matter.length * T0 / forceExt) / side
+        forceExt = 2
+        startPos = (side - matter.length * T0 / forceExt) / side
         plunger = initPlunger(side, startPos, 5, forceExt, 0.9, true)
         plunger.avgImpulse = forceExt
     }
@@ -172,5 +170,85 @@ function charles_law_sim(p) {
     }
 }
 
+function gay_lussac_law_sim(p) {
+    let side, diameter, matter, view, selected, target, border;
+
+    let state_pressure = { impulse: 0, frames: 0, pressureSum: 0, n: 0, iteration_counter: 30 };
+    const pressure_readout = document.getElementById('gay-lussac-law-pressure-readout')
+
+    let T0, forceExt, startPos
+    const temperature = document.getElementById('gay-lussac-law-temperature')
+    const temperature_readout = document.getElementById('gay-lussac-law-temperature-readout')
+
+
+    p.setup = function () {
+        side = getCanvasSize(400, 'gay_lussac_law_sim');
+        diameter = 5;
+        selected = null
+
+        p.createCanvas(side, side).parent('gay_lussac_law_sim');
+        matter = balls_init(200, side, 'gay_lussac_law_sim')
+        view = Visible('gay_lussac_law_sim');
+        border = [side, side, 0, 0]
+        target = 0
+
+        //slider
+        temperature.max = 15
+        temperature.min = 2
+        temperature.value = 5
+        T0 = temperature.value * 20
+        temperature_readout.textContent = T0 + ' K'
+        temperature.addEventListener('input', () => {
+            temperature_readout.textContent = temperature.value * 20 + ' K'
+        })
+
+        matter = balls_vrandom(matter, matter.length * T0)
+    }
+
+    p.mousePressed = function () {
+        for (let i of matter) {
+            if (mouseInteract(i, p.mouseX, p.mouseY, diameter)) {
+                selected = i
+                break
+            }
+        }
+    }
+
+    p.mouseReleased = function () {
+        if (selected) {
+            selected = null
+        }
+    }
+
+    p.draw = function () {
+        if (!view.visible) return
+
+        tempChange(matter, parseFloat(temperature.value) * 20, 0.05);
+        p.background(...bgTempChange(matter, 10));
+
+        readoutPressure(matter, pressure_readout, state_pressure, side, diameter, border);
+
+        for (let i of matter) {
+            updatematter(i, matter, 0, 0, 1, 1, 1, diameter)
+        }
+        checkcollision(matter, diameter)
+
+        for (let i of matter) {
+            updateparticle(i, side, diameter, 1, border)
+            p.fill("black");
+            p.noStroke()
+            p.circle(i.x, i.y, diameter - 0.1)
+        }
+
+        if (selected) {
+            applyForce(selected, p.mouseX, p.mouseY, diameter, 0.01, 0.5)
+            p.stroke('black')
+            drawVector(p, p.mouseX, p.mouseY, selected.x, selected.y)
+        }
+
+    }
+}
+
+new p5(gay_lussac_law_sim);
 new p5(charles_law_sim);
 new p5(boyle_law_sim);
