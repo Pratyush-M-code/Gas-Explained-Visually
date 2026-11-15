@@ -251,34 +251,47 @@ function initPlunger(side, starting_pos, mass, F_ext, smoothing, freedom = false
     }
 }
 
-function updatePlunger(plunger, matter, side, diameter, smoothing = 0.01) {
+function updatePlunger(plunger, matter, side, diameter, smoothing = 0.01, target_pos) {
+    const r = diameter / 2
+    const prev = plunger.position
+
+    //motion
+    if (plunger.freedom === true) {
+        piston.velocity += (piston.F_ext - piston.avgImpulse) / piston.mass;
+        piston.velocity *= piston.damping
+        plunger.position += plunger.velocity
+    } else if (target_pos !== undefined) {
+        const step = Math.max(-r, Math.min(r, target_pos - plunger.position)) //smooth movement
+        plunger.position += step
+        plunger.velocity = step
+    } else {
+        plunger.velocity = 0 // stationary
+    }
+    plunger.postion = Math.max(0, Math.min(side - 2 * diameter, plunger.position))
+    plunger.velocity = plunger.position - prev;
+
+    //particles maintaining KE
     let impulse = 0;
     for (const i of matter) {
-        if (i.vy < 0 && i.y + i.vy - diameter / 2 < piston.wall) {
-            impulse += 2 * Math.abs(i.vy);
+        if (i.y - r < plunger.position) {
+            i.y = plunger.position + r;
+            if (i.vy < 0) {
+                impulse += 2 * Math.abs(i.vy);
+                i.vy = -i.vy;
+            }
         }
     }
     plunger.avgImpulse += (impulse - plunger.avgImpulse) * smoothing
 
-    if (plunger.freedom === true) {
-        piston.v += (piston.F_ext - piston.avgImpulse) / piston.mass;
-        piston.v *= piston.damping;
-        piston.wall = Math.max(0, Math.min(side - 2 * diameter, piston.wall + piston.v));
-
-        return [side, side, 0, piston.wall];
-    }
-    else if (plunger.freedom === false) {
-        return [side, side, 0, 0];
-    }
+    return [side, side, 0, plunger.position]
 }
 
-function drawPlunger(p, side, border) {
-    const [wallposX, wallposY, wall0X, wall0Y] = border;
+function drawPlunger(p, side, plunger) {
     const thickness = 8;
     p.noStroke();
     p.fill('#B7410E');
-    if (wall0Y > 0) {
-        p.rect(0, wall0Y - thickness, side, thickness);
+    if (plunger.position > 0) {
+        p.rect(0, plunger.position - thickness, side, thickness);
     }
 }
 

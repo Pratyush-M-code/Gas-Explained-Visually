@@ -30,9 +30,11 @@ function boyle_law_sim(p) {
         volume.addEventListener('input', () => {
             target = side - (volume.value / side)
             volume_readout.textContent = Math.round(volume.value / 10000) + ' unit^2'
-            border = [side, side, 0, target]
+            target = side - (volume.value / side);
         })
 
+        //plunger
+        plunger = initPlunger(side, 0, 30, 0, 0.9, false);
     }
 
     p.mousePressed = function () {
@@ -54,11 +56,10 @@ function boyle_law_sim(p) {
         if (!view.visible) return
 
         p.background(p.color('#a7a7a7'));
-        drawPlunger(p, side, border);
+        drawPlunger(p, side, plunger);
 
         readoutPressure(matter, pressure_readout, state_pressure, side, diameter, border);
-        currentWall += Math.max(-(diameter / 2), Math.min(diameter / 2, target - currentWall))
-        border = [side, side, 0, currentWall]
+        border = updatePlunger(plunger, matter, side, diameter, 0.1, target);
 
         for (let i of matter) {
             updatematter(i, matter, 0, 0, 1, 1, 1, diameter)
