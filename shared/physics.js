@@ -232,22 +232,44 @@ function thermostat(particles, temp_target, friction_strength, time_step) {
 // Pressure, Volume, Temp Changers and Functions
 
 // initalize with let state_pressure = { impulse: 0, frames: 0, pressureSum: 0, n: 0, iteration_counter: x };
-function readoutPressure(matter, readout, state, side, diameter) {
+function readoutPressure(matter, readout, state, side, diameter, border) {
+    const [wallposX, wallposY, wall0X, wall0Y] = border;
     for (let i of matter) {
-        state.impulse += (i.x + i.vx + diameter / 2 > side) ? (2 * Math.abs(i.vx)) : 0
-        state.impulse += (i.x + i.vx + diameter / 2 < 0) ? (2 * Math.abs(i.vx)) : 0
-        state.impulse += (i.y + i.vy + diameter / 2 > side) ? (2 * Math.abs(i.vy)) : 0
-        state.impulse += (i.y + i.vy + diameter / 2 < 0) ? (2 * Math.abs(i.vy)) : 0
+        state.impulse += (i.x + i.vx + diameter / 2 > wallposX) ? (2 * Math.abs(i.vx)) : 0
+        state.impulse += (i.x + i.vx + diameter / 2 < wall0X) ? (2 * Math.abs(i.vx)) : 0
+        state.impulse += (i.y + i.vy + diameter / 2 > wallposY) ? (2 * Math.abs(i.vy)) : 0
+        state.impulse += (i.y + i.vy + diameter / 2 < wall0Y) ? (2 * Math.abs(i.vy)) : 0
     }
     state.frames++
     if (state.frames >= state.iteration_counter) {
         const force = state.impulse / state.frames;
-        const pressure = force / (4 * side);
-
+        const perimeter = 2 * (wallposX - wall0X) + 2 * (wallposY - wall0Y);
+        const pressure = force / perimeter;
         state.impulse = 0; state.frames = 0;
         state.n++; state.pressureSum += pressure;
         const avgPressure = state.pressureSum / state.n;
-        readout.textContent = avgPressure.toFixed(4);
+        readout.textContent = (avgPressure.toFixed(5) * Math.pow(10, 4)).toFixed(1) + ' Pa'
+    }
+}
+
+function drawPlunger(p, side, border) {
+    const [wallposX, wallposY, wall0X, wall0Y] = border;
+    const thickness = 8;
+
+    p.noStroke();
+    p.fill('#B7410E');
+
+    if (wall0X > 0) {
+        p.rect(wall0X - thickness, 0, thickness, side);
+    }
+    if (wallposX < side) {
+        p.rect(wallposX, 0, thickness, side);
+    }
+    if (wall0Y > 0) {
+        p.rect(0, wall0Y - thickness, side, thickness);
+    }
+    if (wallposY < side) {
+        p.rect(0, wallposY, side, thickness);
     }
 }
 

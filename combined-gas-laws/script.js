@@ -4,7 +4,7 @@ function boyle_law_sim(p) {
     let state_pressure = { impulse: 0, frames: 0, pressureSum: 0, n: 0, iteration_counter: 30 };
     const pressure_readout = document.getElementById('boyle-law-pressure-readout')
 
-    let min_side, currentWallX = 0
+    let min_side, currentWall = 0
     const volume = document.getElementById('boyle-law-volume')
     const volume_readout = document.getElementById('boyle-law-volume-readout')
 
@@ -30,7 +30,7 @@ function boyle_law_sim(p) {
         volume.addEventListener('input', () => {
             target = side - (volume.value / side)
             volume_readout.textContent = Math.round(volume.value / 10000) + ' unit^2'
-            border = [side, side, target, 0]
+            border = [side, side, 0, target]
         })
 
     }
@@ -54,9 +54,11 @@ function boyle_law_sim(p) {
         if (!view.visible) return
 
         p.background(p.color('#a7a7a7'));
-        readoutPressure(matter, pressure_readout, state_pressure, side, diameter);
-        currentWallX += Math.max(-(diameter / 2), Math.min(diameter / 2, target - currentWallX))
-        border = [side, side, currentWallX, 0]
+        drawPlunger(p, side, border);
+        
+        readoutPressure(matter, pressure_readout, state_pressure, side, diameter, border);
+        currentWall += Math.max(-(diameter / 2), Math.min(diameter / 2, target - currentWall))
+        border = [side, side, 0, currentWall]
 
         for (let i of matter) {
             updatematter(i, matter, 0, 0, 1, 1, 1, diameter)
@@ -64,7 +66,7 @@ function boyle_law_sim(p) {
         }
 
         for (let i of matter) {
-            updateparticle(i, side, diameter, 0.8, border)
+            updateparticle(i, side, diameter, 1, border)
             p.fill("black");
             p.noStroke()
             p.circle(i.x, i.y, diameter - 0.1)
