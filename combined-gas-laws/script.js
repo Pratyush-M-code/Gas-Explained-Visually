@@ -1,6 +1,10 @@
 function boyle_law_sim(p) {
-    let side, diameter, matter, view, selected, target;
+    let side, diameter, matter, view, selected, target, border;
+
+    let state_pressure = { impulse: 0, frames: 0, pressureSum: 0, n: 0, iteration_counter: 30 };
     const pressure_readout = document.getElementById('boyle-law-pressure-readout')
+
+    let min_side, currentWallX = 0
     const volume = document.getElementById('boyle-law-volume')
     const volume_readout = document.getElementById('boyle-law-volume-readout')
 
@@ -14,18 +18,21 @@ function boyle_law_sim(p) {
         matter = balls_init(60, side, 'boyle_law_sim');
         matter = balls_vrandom(matter, 120);
         view = Visible('boyle_law_sim');
-
+        border = [side, side, 0, 0]
+        target = 0
 
         //slider
-        side_volume = side / 10
-        volume.max = Math.round(side_volume) // not actually volume but side length
-        volume.min = Math.round(side_volume / 5)
-        volume.value = (volume.min + volume.max) / 2
-        volume.textContent = (volume.value * volume.max) + ' unit^2' // actually volume
+        min_side = side / 3
+        volume.max = Math.round(side * side)
+        volume.min = Math.round(side * min_side)
+        volume.value = volume.max
+        volume_readout.textContent = volume.value / 10000 + ' unit^2'
         volume.addEventListener('input', () => {
-            target = volume.value * volume.max
-            volume_readout.textContent = target + ' unit^2'
+            target = side - (volume.value / side)
+            volume_readout.textContent = Math.round(volume.value / 10000) + ' unit^2'
+            border = [side, side, target, 0]
         })
+
     }
 
     p.mousePressed = function () {
@@ -47,6 +54,9 @@ function boyle_law_sim(p) {
         if (!view.visible) return
 
         p.background(p.color('#a7a7a7'));
+        readoutPressure(matter, pressure_readout, state_pressure, side, diameter);
+        currentWallX += Math.max(-(diameter / 2), Math.min(diameter / 2, target - currentWallX))
+        border = [side, side, currentWallX, 0]
 
         for (let i of matter) {
             updatematter(i, matter, 0, 0, 1, 1, 1, diameter)
@@ -54,7 +64,7 @@ function boyle_law_sim(p) {
         }
 
         for (let i of matter) {
-            updateparticle(i, side, diameter, 0.8)
+            updateparticle(i, side, diameter, 0.8, border)
             p.fill("black");
             p.noStroke()
             p.circle(i.x, i.y, diameter - 0.1)
@@ -65,6 +75,7 @@ function boyle_law_sim(p) {
             p.stroke('black')
             drawVector(p, p.mouseX, p.mouseY, selected.x, selected.y)
         }
+
     }
 }
 

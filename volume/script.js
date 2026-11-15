@@ -100,7 +100,7 @@ function vol_liquid_sim(p) {
         }
 
         for (let i of liquid) {
-            updateparticle(i, side, diameter, 0.8, boxWidth)
+            updateparticle(i, side, diameter, 0.8, [boxWidth, side, 0, 0])
             p.fill("black");
             p.noStroke();
             p.circle(i.x, i.y, diameter - 0.1)

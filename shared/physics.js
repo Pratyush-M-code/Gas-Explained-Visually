@@ -94,23 +94,29 @@ function balls_vrandom(particles, KE) {
     return particles;
 }
 
-function updateparticle(element, canvas_size, diameter, elasticity, wallposX = canvas_size, wall0Y = 0) {
+//Physics Stuff
+
+/**
+ * @param {number[]} [border] - Optional [wallposX, wallposY, wall0X, wall0Y] to override the boundary. Defaults canvas.
+ */
+function updateparticle(element, canvas_size, diameter, elasticity, border = [canvas_size, canvas_size, 0, 0]) {
+    const [wallposX, wallposY, wall0X, wall0Y] = border;
     element.x += element.vx
     element.y += element.vy
-    if (element.x > wallposX - diameter / 2) {
-        element.x = wallposX - diameter / 2;
+    if (element.x > wallposX - (diameter / 2)) {
+        element.x = wallposX - (diameter / 2);
         element.vx *= -elasticity;
     }
-    if (element.x < diameter / 2) {
-        element.x = diameter / 2;
+    if (element.x < wall0X + (diameter / 2)) {
+        element.x = wall0X + (diameter / 2);
         element.vx *= -elasticity;
     }
     if (element.y < wall0Y + (diameter / 2)) {
         element.y = wall0Y + (diameter / 2);
         element.vy *= -elasticity;
     }
-    if (element.y > canvas_size - diameter / 2) {
-        element.y = canvas_size - diameter / 2;
+    if (element.y > wallposY - (diameter / 2)) {
+        element.y = wallposY - (diameter / 2);
         element.vy *= -elasticity;
     }
     element.oldVx = element.vx;
@@ -223,6 +229,28 @@ function thermostat(particles, temp_target, friction_strength, time_step) {
     }
 }
 
+// Pressure, Volume, Temp Changers and Functions
+
+// initalize with let state_pressure = { impulse: 0, frames: 0, pressureSum: 0, n: 0, iteration_counter: x };
+function readoutPressure(matter, readout, state, side, diameter) {
+    for (let i of matter) {
+        state.impulse += (i.x + i.vx + diameter / 2 > side) ? (2 * Math.abs(i.vx)) : 0
+        state.impulse += (i.x + i.vx + diameter / 2 < 0) ? (2 * Math.abs(i.vx)) : 0
+        state.impulse += (i.y + i.vy + diameter / 2 > side) ? (2 * Math.abs(i.vy)) : 0
+        state.impulse += (i.y + i.vy + diameter / 2 < 0) ? (2 * Math.abs(i.vy)) : 0
+    }
+    state.frames++
+    if (state.frames >= state.iteration_counter) {
+        const force = state.impulse / state.frames;
+        const pressure = force / (4 * side);
+
+        state.impulse = 0; state.frames = 0;
+        state.n++; state.pressureSum += pressure;
+        const avgPressure = state.pressureSum / state.n;
+        readout.textContent = avgPressure.toFixed(4);
+    }
+}
+
 function tempChange(particles, temp_target, strength) {
     let ke = 0
     for (const p of particles) {
@@ -261,6 +289,8 @@ function bgTempChange(particles, strength) {
 
     return baseColor
 }
+
+// Mouse interaction functions
 
 function attractMouse(element, mouseX, mouseY, attractForce, attractDistance, maxAttraction = 25) {
     let dx = mouseX - element.x;
