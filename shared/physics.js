@@ -229,7 +229,62 @@ function thermostat(particles, temp_target, friction_strength, time_step) {
     }
 }
 
+// plunger mechanices => only for y axis.
+// plunger = {
+//     position: ("y coordinate fraction w.r.t to the whole"),
+//     velocity: ("velocity in ONLY y axis"),
+//     mass: ("mass for force exerted at rest"),
+//     forceExt: ("for outer force action on plunger"),
+//     damping: ("aka smooth motion"),
+//     avgImpluse: ("to help the molecules gain energy on hitting the plunger")
+//     freedom: ("freedom of movement")
+// }
+function initPlunger(side, starting_pos, mass, F_ext, smoothing, freedom = false) {
+    return {
+        position: side * starting_pos,
+        velocity: 0,
+        mass: mass,
+        forceExt: F_ext,
+        damping: smoothing,
+        avgImpulse: 0,
+        freedom: freedom
+    }
+}
+
+function updatePlunger(plunger, matter, side, diameter, smoothing = 0.01) {
+    let impulse = 0;
+    for (const i of matter) {
+        if (i.vy < 0 && i.y + i.vy - diameter / 2 < piston.wall) {
+            impulse += 2 * Math.abs(i.vy);
+        }
+    }
+    plunger.avgImpulse += (impulse - plunger.avgImpulse) * smoothing
+
+    if (plunger.freedom === true) {
+        piston.v += (piston.F_ext - piston.avgImpulse) / piston.mass;
+        piston.v *= piston.damping;
+        piston.wall = Math.max(0, Math.min(side - 2 * diameter, piston.wall + piston.v));
+
+        return [side, side, 0, piston.wall];
+    }
+    else if (plunger.freedom === false) {
+        return [side, side, 0, 0];
+    }
+}
+
+function drawPlunger(p, side, border) {
+    const [wallposX, wallposY, wall0X, wall0Y] = border;
+    const thickness = 8;
+    p.noStroke();
+    p.fill('#B7410E');
+    if (wall0Y > 0) {
+        p.rect(0, wall0Y - thickness, side, thickness);
+    }
+}
+
 // Pressure, Volume, Temp Changers and Functions
+
+
 
 // initalize with let state_pressure = { impulse: 0, frames: 0, pressureSum: 0, n: 0, iteration_counter: x };
 function readoutPressure(matter, readout, state, side, diameter, border) {
@@ -249,27 +304,6 @@ function readoutPressure(matter, readout, state, side, diameter, border) {
         state.n++; state.pressureSum += pressure;
         const avgPressure = state.pressureSum / state.n;
         readout.textContent = (avgPressure.toFixed(5) * Math.pow(10, 4)).toFixed(1) + ' Pa'
-    }
-}
-
-function drawPlunger(p, side, border) {
-    const [wallposX, wallposY, wall0X, wall0Y] = border;
-    const thickness = 8;
-
-    p.noStroke();
-    p.fill('#B7410E');
-
-    if (wall0X > 0) {
-        p.rect(wall0X - thickness, 0, thickness, side);
-    }
-    if (wallposX < side) {
-        p.rect(wallposX, 0, thickness, side);
-    }
-    if (wall0Y > 0) {
-        p.rect(0, wall0Y - thickness, side, thickness);
-    }
-    if (wallposY < side) {
-        p.rect(0, wallposY, side, thickness);
     }
 }
 
