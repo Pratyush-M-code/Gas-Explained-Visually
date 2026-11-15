@@ -257,27 +257,25 @@ function updatePlunger(plunger, matter, side, diameter, smoothing = 0.01, target
 
     //motion
     if (plunger.freedom === true) {
-        piston.velocity += (piston.F_ext - piston.avgImpulse) / piston.mass;
-        piston.velocity *= piston.damping
+        plunger.velocity += (plunger.forceExt - plunger.avgImpulse) / plunger.mass
+        plunger.velocity *= plunger.damping
+        plunger.velocity = Math.max(-diameter, Math.min(diameter, plunger.velocity)) //speedbump
         plunger.position += plunger.velocity
     } else if (target_pos !== undefined) {
-        const step = Math.max(-r, Math.min(r, target_pos - plunger.position)) //smooth movement
+        const step = Math.max(-r, Math.min(r, target_pos - plunger.position))
         plunger.position += step
-        plunger.velocity = step
-    } else {
-        plunger.velocity = 0 // stationary
     }
-    plunger.postion = Math.max(0, Math.min(side - 2 * diameter, plunger.position))
-    plunger.velocity = plunger.position - prev;
+    plunger.position = Math.max(0, Math.min(side - 2 * diameter, plunger.position))
+    plunger.velocity = plunger.position - prev
 
     //particles maintaining KE
     let impulse = 0;
     for (const i of matter) {
         if (i.y - r < plunger.position) {
-            i.y = plunger.position + r;
+            i.y = plunger.position + r
             if (i.vy < 0) {
-                impulse += 2 * Math.abs(i.vy);
-                i.vy = -i.vy;
+                impulse += 2 * Math.abs(i.vy)
+                i.vy = -i.vy
             }
         }
     }
@@ -304,9 +302,9 @@ function readoutPressure(matter, readout, state, side, diameter, border) {
     const [wallposX, wallposY, wall0X, wall0Y] = border;
     for (let i of matter) {
         state.impulse += (i.x + i.vx + diameter / 2 > wallposX) ? (2 * Math.abs(i.vx)) : 0
-        state.impulse += (i.x + i.vx + diameter / 2 < wall0X) ? (2 * Math.abs(i.vx)) : 0
+        state.impulse += (i.x + i.vx - diameter / 2 < wall0X) ? (2 * Math.abs(i.vx)) : 0
         state.impulse += (i.y + i.vy + diameter / 2 > wallposY) ? (2 * Math.abs(i.vy)) : 0
-        state.impulse += (i.y + i.vy + diameter / 2 < wall0Y) ? (2 * Math.abs(i.vy)) : 0
+        state.impulse += (i.y + i.vy - diameter / 2 < wall0Y) ? (2 * Math.abs(i.vy)) : 0
     }
     state.frames++
     if (state.frames >= state.iteration_counter) {
