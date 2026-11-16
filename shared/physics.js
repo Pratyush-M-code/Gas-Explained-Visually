@@ -295,8 +295,6 @@ function drawPlunger(p, side, plunger) {
 
 // Pressure, Volume, Temp Changers and Functions
 
-
-
 // initalize with let state_pressure = { impulse: 0, frames: 0, pressureSum: 0, n: 0, iteration_counter: x };
 function readoutPressure(matter, readout, state, side, diameter, border) {
     const [wallposX, wallposY, wall0X, wall0Y] = border;
@@ -315,6 +313,8 @@ function readoutPressure(matter, readout, state, side, diameter, border) {
         state.n++; state.pressureSum += pressure;
         const avgPressure = state.pressureSum / state.n;
         readout.textContent = (avgPressure.toFixed(5) * Math.pow(10, 4)).toFixed(1) + ' Pa'
+        state.latest = pressure * Math.pow(10, 4)
+        state.fresh = true
     }
 }
 
@@ -414,3 +414,5 @@ function applyForce(element, mouseX, mouseY, diameter, forceMultiplier, maxForce
         element.vy += force * Math.sin(angle);
     }
 }
+
+// Chart Makers

@@ -41,6 +41,15 @@ This project to to help explain the different gaseous laws and their relations i
 - Kinetic Energy Sim
 - Explaining how future temperature simulations will work
 
+### Combined Gas Laws:-
+
+- Boyle's law the realtion between Pressure and Volume
+  - Pressure vs Volume Graph
+- Charles's law the realtion between Temperature and Volume
+  - Temperature vs Volume Graph
+- Gay-Lussac's law the realtion between Temperature and Pressure
+  - Temperature vs Pressure Graph
+
 ### Physics Engine
 
 - Update Matter, uses [Lennard-Jones Potential](https://www.sciencedirect.com/topics/pharmacology-toxicology-and-pharmaceutical-science/lennard-jones-potential) the to completly revamp attraction between the particles and also to replicate liquid, gases and solid. ![Desmos graph of how this works!](https://www.desmos.com/calculator/0umqgghqjf)
@@ -48,6 +57,7 @@ This project to to help explain the different gaseous laws and their relations i
   - For Liquid => updatematter(i, liquid, 0.1, 0.05, 0.99, 0.9, 1, diameter)
   - For Solid => updatematter(i, solid, 0, 3, 0.9, 0.9, Infinity, diameter)
 - random_motion & thermostat uses [Brownian motion of Multiple particle](https://paleodyn.uni-bremen.de/study/Dyn2/dyn2script_SCM.pdf) to calculate Brownian Motion and their temperatures!
+- Plunger Mechanics => Fuction uses  updatePlunger and initPlunger to make an object inline with thermodynamic processes like Isothermal expansion.
 - Right now, there is more to come! But, as of now these are the scientific principals I have used.
 
 ## Usage
