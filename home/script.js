@@ -115,6 +115,66 @@ function temperature_sim(p) {
     }
 }
 
+function combined_gas_sim(p) {
+    let side, diameter, matter, view, selected, current_temperature, border, plunger;
+
+    let T0, forceExt, startPos, state_temperature = { iteration: 0, iteration_counter: 60, minVolumeFrames: 0, curveDrawn: false }
+    const temperature = {}
+
+    p.setup = function () {
+        el = document.getElementById('combined_gas_sim')
+        side = getCanvasSize(el.clientWidth, 'combined_gas_sim');
+        diameter = 5;
+        selected = null
+
+        p.createCanvas(side, side).parent('combined_gas_sim');
+        matter = balls_init(200, side, 'combined_gas_sim')
+        view = Visible('combined_gas_sim');
+        border = [side, side, 0, 0]
+
+        //slider
+        temperature.max = 15
+        temperature.min = 5
+        temperature.value = 10
+        temperature.step = 0.05
+        T0 = temperature.value * 20
+        current_temperature = temperature.value
+
+        matter = balls_vrandom(matter, matter.length * T0)
+
+        //plunger
+        plunger = initPlunger(side, 0.45, 1, 13, 0.9, true)
+        plunger.avgImpulse = 183
+    }
+
+    p.draw = function () {
+        if (!view.visible) return
+
+        temperature.value = 10 + 5 * Math.sin(p.frameCount * 0.0075)
+        current_temperature += (parseFloat(temperature.value) - current_temperature) * 0.02
+        tempChange(matter, current_temperature * 20, 0.05);
+        p.background(p.color('#a7a7a7'));
+
+        border = updatePlunger(plunger, matter, side, diameter, 0.1);
+        drawPlunger(p, side, plunger);
+
+
+        for (let i of matter) {
+            updatematter(i, matter, 0, 0, 1, 1, 1, diameter)
+        }
+        checkcollision(matter, diameter)
+
+        for (let i of matter) {
+            updateparticle(i, side, diameter, 1, border)
+            p.fill("black");
+            p.noStroke()
+            p.circle(i.x, i.y, diameter - 0.1)
+        }
+
+    }
+}
+
 new p5(vol_sim)
 new p5(pressure_sim)
 new p5(temperature_sim)
+new p5(combined_gas_sim)
