@@ -294,6 +294,83 @@ function drawPlunger(p, side, plunger) {
 }
 
 // Pressure, Volume, Temp Changers and Functions
+/**
+ * latest => Most recent value
+ * target => Value to reach
+ * iteration_limit => number of iterations that is to be counted for averages
+ * freedom => if "fixed" => value is fixed
+ *            if "set" => value is set by target
+ *            if "variable" => value is set by matter or particles array
+ * data_store => stores data essential for average calculations
+ */
+class state_pressure {
+    latest = 0;
+    target = 0;
+    iteration_limit = x;
+    freedom = "fixed";
+    data_store = { pressure_history: [] };
+}
+class state_temperature {
+    latest = 0;
+    target = 0;
+    iteration_limit = x;
+    freedom = "fixed";
+    data_store = { pressure_history: [] };
+}
+class state_volume {
+    latest = 0;
+    target = 0;
+    iteration_limit = x;
+    freedom = "fixed";
+    data_store = { pressure_history: [] };
+}
+
+function updatePressure(particles, state_pressure, border, diameter) {
+    const [wallposX, wallposY, wall0X, wall0Y] = border;
+    if (state_pressure.freedom === "fixed") { // Isobaric Process
+
+    }
+    if (state_pressure.freedom === "set") { // Processes where Pressure is controlled (never)
+
+    }
+    if (state_pressure.freedom === "variable") { // All other Processes
+        let impulse = 0
+        for (let i of particles) {
+            impulse += (i.x + i.vx + diameter / 2 > wallposX) ? (2 * Math.abs(i.vx)) : 0
+            impulse += (i.x + i.vx - diameter / 2 < wall0X) ? (2 * Math.abs(i.vx)) : 0
+            impulse += (i.y + i.vy + diameter / 2 > wallposY) ? (2 * Math.abs(i.vy)) : 0
+            impulse += (i.y + i.vy - diameter / 2 < wall0Y) ? (2 * Math.abs(i.vy)) : 0
+        }
+        const force = impulse / state_pressure.iteration_limit
+        const perimeter = 2 * (wallposX - wall0X) + 2 * (wallposY - wall0Y)
+        state_pressure.data_store.pressure_history.push(force / perimeter)
+
+        if (state_pressure.data_store.pressure_history.length > state_pressure.iteration_limit) {
+            state_pressure.data_store.pressure_history.shift()
+        }
+        let sum_pressure = 0
+        for (let i = 0; i < state_pressure.data_store.pressure_history.length; i++) {
+            sum_pressure += state_pressure.data_store.pressure_history[i]
+        }
+        state_pressure.latest = sum_pressure / state_pressure.data_store.pressure_history.length
+    }
+}
+
+function updateTemperature(particles, temp_target, strength) {
+    let ke = 0
+    for (const p of particles) {
+        ke += (p.vx * p.vx + p.vy * p.vy) / 2
+    }
+
+    const temp_now = Math.max(ke / particles.length, 1e-6)
+    const scale = 1 + strength * (Math.sqrt(temp_target / temp_now) - 1)
+
+    for (const p of particles) {
+        p.vx *= scale
+        p.vy *= scale
+    }
+}
+
 
 // initalize with let state_pressure = { impulse: 0, frames: 0, pressureSum: 0, n: 0, iteration_counter: x };
 function readoutPressure(matter, readout, state, side, diameter, border) {
