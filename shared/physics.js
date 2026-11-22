@@ -294,6 +294,15 @@ function drawPlunger(p, side, plunger) {
 }
 
 // Pressure, Volume, Temp Changers and Functions
+
+/**
+ * How is Pressure Defined?
+ * => Pressure is defined as the impulse of all the iteractions of the particles with the wall (force) divided by the perimeter.
+ * 
+ * How is Temperature Defined?
+ * => Temperature is defined as the average Kinetic Energy of all the particles.
+ */
+
 /**
  * latest => Most recent value
  * target => Value to reach
@@ -315,14 +324,14 @@ class state_temperature {
     target = 0;
     iteration_limit = x;
     freedom = "fixed";
-    data_store = { pressure_history: [] };
+    data_store = { temperature_history: [], strength_tempChange: 0 };
 }
 class state_volume {
     latest = 0;
     target = 0;
     iteration_limit = x;
     freedom = "fixed";
-    data_store = { pressure_history: [] };
+    data_store = { temperature_history: [], strength_tempChange: 0 };
 }
 
 function updatePressure(particles, state_pressure, border, diameter) {
@@ -356,20 +365,42 @@ function updatePressure(particles, state_pressure, border, diameter) {
     }
 }
 
-function updateTemperature(particles, temp_target, strength) {
-    let ke = 0
-    for (const p of particles) {
-        ke += (p.vx * p.vx + p.vy * p.vy) / 2
+function updateTemperature(particles, state_temperature, border) {
+    const [wallposX, wallposY, wall0X, wall0Y] = border;
+    if (state_temperature.freedom === "fixed") { // Isothermal Process
+
     }
+    if (state_temperature.freedom === "set") { // Processes where Temperature is controlled
+        let ke = 0
+        for (const p of particles) {
+            ke += (p.vx * p.vx + p.vy * p.vy) / 2
+        }
 
-    const temp_now = Math.max(ke / particles.length, 1e-6)
-    const scale = 1 + strength * (Math.sqrt(temp_target / temp_now) - 1)
+        const temp_now = Math.max(ke / particles.length, 1e-6)
+        let scale = 0
+        if (temp_now === state_temperature.target) {
+            scale = 1
+        } else {
+            const temp_diff = (state_temperature.target - temp_now) / state_temperature.iteration_limit
+            scale = Math.sqrt(state_temperature.target / temp_now)
+        }
 
-    for (const p of particles) {
-        p.vx *= scale
-        p.vy *= scale
+        for (const p of particles) {
+            p.vx *= scale
+            p.vy *= scale
+        }
+        state_temperature = temp_now + temp_diff
+    }
+    if (state_temperature.freedom === "variable") { // All other Processes
+        let ke = 0
+        for (const p of particles) {
+            ke += (p.vx * p.vx + p.vy * p.vy) / 2
+        }
+        const temp_now = Math.max(ke / particles.length, 1e-6)
+        state_temperature = temp_now
     }
 }
+
 
 
 // initalize with let state_pressure = { impulse: 0, frames: 0, pressureSum: 0, n: 0, iteration_counter: x };
