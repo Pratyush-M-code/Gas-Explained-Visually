@@ -295,12 +295,19 @@ function drawPlunger(p, side, plunger) {
 
 // Pressure, Volume, Temp Changers and Functions
 
+class state {
+
+}
+
 /**
  * How is Pressure Defined?
  * => Pressure is defined as the impulse of all the iteractions of the particles with the wall (force) divided by the perimeter.
  * 
  * How is Temperature Defined?
  * => Temperature is defined as the average Kinetic Energy of all the particles.
+ * 
+ * How is Volume Defined? 
+ * => As the Area taken by the particles with respect to their Kinetic energy
  */
 
 /**
@@ -315,23 +322,23 @@ function drawPlunger(p, side, plunger) {
 class state_pressure {
     latest = 0;
     target = 0;
-    iteration_limit = x;
+    iteration_limit = 0;
     freedom = "fixed";
     data_store = { pressure_history: [] };
 }
 class state_temperature {
     latest = 0;
     target = 0;
-    iteration_limit = x;
+    iteration_limit = 0;
     freedom = "fixed";
     data_store = { temperature_history: [], strength_tempChange: 0 };
 }
 class state_volume {
     latest = 0;
     target = 0;
-    iteration_limit = x;
+    iteration_limit = 0;
     freedom = "fixed";
-    data_store = { temperature_history: [], strength_tempChange: 0 };
+    data_store = { piston_velocity: 0, piston_mass: 0, external_Force: 0, piston_impulse_hist: [] };
 }
 
 function updatePressure(particles, state_pressure, border, diameter) {
@@ -350,7 +357,7 @@ function updatePressure(particles, state_pressure, border, diameter) {
             impulse += (i.y + i.vy + diameter / 2 > wallposY) ? (2 * Math.abs(i.vy)) : 0
             impulse += (i.y + i.vy - diameter / 2 < wall0Y) ? (2 * Math.abs(i.vy)) : 0
         }
-        const force = impulse / state_pressure.iteration_limit
+        const force = impulse
         const perimeter = 2 * (wallposX - wall0X) + 2 * (wallposY - wall0Y)
         state_pressure.data_store.pressure_history.push(force / perimeter)
 
@@ -377,19 +384,13 @@ function updateTemperature(particles, state_temperature, border) {
         }
 
         const temp_now = Math.max(ke / particles.length, 1e-6)
-        let scale = 0
-        if (temp_now === state_temperature.target) {
-            scale = 1
-        } else {
-            const temp_diff = (state_temperature.target - temp_now) / state_temperature.iteration_limit
-            scale = Math.sqrt(state_temperature.target / temp_now)
-        }
+        const scale = 1 + state_temperature.data_store.strength_tempChange * (Math.sqrt(state_temperature.target / temp_now) - 1)
 
         for (const p of particles) {
             p.vx *= scale
             p.vy *= scale
         }
-        state_temperature = temp_now + temp_diff
+        state_temperature.latest = temp_now
     }
     if (state_temperature.freedom === "variable") { // All other Processes
         let ke = 0
@@ -397,10 +398,64 @@ function updateTemperature(particles, state_temperature, border) {
             ke += (p.vx * p.vx + p.vy * p.vy) / 2
         }
         const temp_now = Math.max(ke / particles.length, 1e-6)
-        state_temperature = temp_now
+        state_temperature.latest = temp_now
     }
 }
 
+function updateVolume(particles, state_volume, border, diameter) {
+    let [wallposX, wallposY, wall0X, wall0Y] = border;
+    if (state_volume.freedom === "fixed") { // Isochoric Process
+        let vol = (wallposX - wall0X) * (wallposY - wall0Y)
+        state_volume.latest = vol
+    }
+    if (state_volume.freedom === "set") { // Processes where Volume is controlled
+        let vol = (wallposX - wall0X) * (wallposY - wall0Y)
+
+        // setting volume
+        let dif = (state_volume.target - vol) / state_volume.iteration_limit
+        wall0Y = wallposY - (vol + dif) / (wallposX - wall0X)
+        wall0Y = Math.max(0, Math.min(wallposY - 2 * diameter, wall0Y))
+        border[3] = wall0Y
+        state_volume.latest = vol + dif
+    }
+    if (state_volume.freedom === "variable") { // All other Processes
+        let vol = (wallposX - wall0X) * (wallposY - wall0Y)
+
+        // piston movement
+        /// impluse on piston
+        let impulse = 0
+        for (let i of particles) {
+            impulse += (i.vy < 0 && i.y + i.vy - diameter / 2 < wall0Y) ? (2 * Math.abs(i.vy)) : 0
+        }
+        state_volume.data_store.piston_impulse_hist.push(impulse)
+
+        if (state_volume.data_store.piston_impulse_hist.length > state_volume.iteration_limit) {
+            state_volume.data_store.piston_impulse_hist.shift()
+        }
+        let sum_pressure = 0
+        for (let i = 0; i < state_volume.data_store.piston_impulse_hist.length; i++) {
+            sum_pressure += state_volume.data_store.piston_impulse_hist[i]
+        }
+        let AvgImpulse = sum_pressure / state_volume.data_store.piston_impulse_hist.length
+        // motion of piston
+        state_volume.data_store.piston_velocity += (state_volume.data_store.external_Force - AvgImpulse) / state_volume.data_store.piston_mass
+        state_volume.data_store.piston_velocity = Math.max(-diameter, Math.min(diameter, state_volume.data_store.piston_velocity))
+
+        // setting volume
+        wall0Y += state_volume.data_store.piston_velocity
+        wall0Y = Math.max(0, Math.min(wallposY - 2 * diameter, wall0Y))
+        border[3] = wall0Y
+        state_volume.latest = (wallposX - wall0X) * (wallposY - wall0Y)
+    }
+}
+
+function drawPiston(p, side, border) {
+    let [wallposX, wallposY, wall0X, wall0Y] = border;
+    const thickness = 8;
+    p.noStroke();
+    p.fill('#B7410E');
+    if (wall0Y > 0) p.rect(0, wall0Y - thickness, side, thickness)
+}
 
 
 // initalize with let state_pressure = { impulse: 0, frames: 0, pressureSum: 0, n: 0, iteration_counter: x };
