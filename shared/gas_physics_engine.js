@@ -4,6 +4,9 @@ class state {
     nballs = 0; // to be init
     canvasSize = 0; // set by getCanvasSize()
     userViewing = false; // set by getUserVisible()
+    diameter = 0;
+    selectedParticle = 0;
+    wallReboundCoff = 0;
 }
 
 /**
@@ -28,19 +31,24 @@ function getCanvasSize(maxSize, state) {
  * @param {State of Simulation} state 
  */
 function getUserVisible(state) {
-    let userView = { visible: true }
-    let element = document.getElementById(state.containerId)
+    state.userViewing = false
+    const element = document.getElementById(state.containerId)
     if (element && 'IntersectionObserver' in window) {
         new IntersectionObserver(entries => {
-            userView.visible = entries[0].isIntersecting
+            state.userViewing = entries[0].isIntersecting
         }).observe(element)
     } else {
         state.userViewing = true
     }
-    state.userViewing = userView
 }
 
-//Use in p.setup() to create balls array and set their initial positions also this is extermely buggy, it is better to leave last 2 parameters empty
+/**
+ * Use in p.setup() to create balls array and set their initial positions
+ * @param {State of Simulation} state 
+ * @param {Space between particles} spacing 
+ * @param {Extra space taken to offset rows} offset 
+ * @returns 
+ */
 function balls_init(state, spacing = undefined, offset = undefined) {
 
     const container = document.getElementById(state.containerId)
@@ -79,14 +87,17 @@ function balls_init(state, spacing = undefined, offset = undefined) {
     return particles
 }
 
-// Use in p.setup() to give particles array intital velocity on the basis of kinetic energy
+/**
+ * Use in p.setup() to give particles array intital kinetic energy
+ * @param {Particles Array} particles 
+ * @param {Initial Kinetic Energy} KE 
+ * @returns 
+ */
 function balls_vrandom(particles, KE) {
     let total = 0, avgx = 0, avgy = 0;
-
     for (let p of particles) {
         p.vx = Math.random() * 2 - 1;
         p.vy = Math.random() * 2 - 1;
-
         total += p.vx * p.vx + p.vy * p.vy;
         avgx += p.vx
         avgy += p.vy
@@ -101,7 +112,6 @@ function balls_vrandom(particles, KE) {
     total -= n * (avgx * avgx + avgy * avgy);
 
     if (total === 0 || particles.length === 0) return;
-
     let scale = Math.sqrt((2 * KE) / total);
 
     for (let p of particles) {
@@ -110,7 +120,6 @@ function balls_vrandom(particles, KE) {
         p.oldVx = p.vx
         p.oldVy = p.vy
     }
-    return particles;
 }
 
 //Physics Stuff
@@ -118,25 +127,17 @@ function balls_vrandom(particles, KE) {
 /**
  * @param {number[]} [border] - Optional [wallposX, wallposY, wall0X, wall0Y] to override the boundary. Defaults canvas.
  */
-function updateparticle(element, canvas_size, diameter, elasticity, border = [canvas_size, canvas_size, 0, 0]) {
-    const [wallposX, wallposY, wall0X, wall0Y] = border;
+function updateparticle(element, state, border = [state.canvasSize, state.canvasSize, 0, 0]) {
     element.x += element.vx
     element.y += element.vy
-    if (element.x > wallposX - (diameter / 2)) {
-        element.x = wallposX - (diameter / 2);
-        element.vx *= -elasticity;
+    const radius = state.diameter / 2
+    if (element.x > border[0] - radius || element.x < border[2] + radius) {
+        element.x = Math.max(wall0X + radius, Math.min(wallposX - radius, element.x))
+        element.vx *= -state.wallReboundCoff
     }
-    if (element.x < wall0X + (diameter / 2)) {
-        element.x = wall0X + (diameter / 2);
-        element.vx *= -elasticity;
-    }
-    if (element.y < wall0Y + (diameter / 2)) {
-        element.y = wall0Y + (diameter / 2);
-        element.vy *= -elasticity;
-    }
-    if (element.y > wallposY - (diameter / 2)) {
-        element.y = wallposY - (diameter / 2);
-        element.vy *= -elasticity;
+    if (element.y > border[1] - radius || element.y < border[3] + radius) {
+        element.y = Math.max(wall0Y + radius, Math.min(wallposY - radius, element.y))
+        element.vy *= -state.wallReboundCoff
     }
     element.oldVx = element.vx;
     element.oldVy = element.vy;
