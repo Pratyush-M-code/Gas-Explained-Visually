@@ -11,8 +11,8 @@ class state {
 
 /**
  * Sets size of canvas based on clientWidth
- * @param {Largest possible canvas size} maxSize 
- * @param {State of Simulation} state 
+ * @param {number} maxSize Largest possible canvas size
+ * @param {state} state State of Simulation
  */
 function getCanvasSize(maxSize, state) {
     const container = document.getElementById(state.containerId);
@@ -28,7 +28,7 @@ function getCanvasSize(maxSize, state) {
 
 /**
  * To check if user views the Sim
- * @param {State of Simulation} state 
+ * @param {state} state State of Simulation
  */
 function getUserVisible(state) {
     state.userViewing = false
@@ -43,11 +43,11 @@ function getUserVisible(state) {
 }
 
 /**
- * Use in p.setup() to create balls array and set their initial positions
- * @param {State of Simulation} state 
- * @param {Space between particles} spacing 
- * @param {Extra space taken to offset rows} offset 
- * @returns 
+ * Use in p.setup() to create the balls array and set their initial positions.
+ * @param {state} state - State of the simulation
+ * @param {number} [spacing] - Space between particles
+ * @param {number} [offset] - Extra space used to offset alternate rows
+ * @returns {Object[]} Particles array
  */
 function balls_init(state, spacing = undefined, offset = undefined) {
 
@@ -89,9 +89,8 @@ function balls_init(state, spacing = undefined, offset = undefined) {
 
 /**
  * Use in p.setup() to give particles array intital kinetic energy
- * @param {Particles Array} particles 
- * @param {Initial Kinetic Energy} KE 
- * @returns 
+ * @param {Object[]} particles Particles Array
+ * @param {number} KE Initial Kinetic Energy
  */
 function balls_vrandom(particles, KE) {
     let total = 0, avgx = 0, avgy = 0;
@@ -125,11 +124,16 @@ function balls_vrandom(particles, KE) {
 //Physics Stuff
 
 /**
+ * To keep particle bounded in border array
+ * @param {Object} element Runs on each particle independantly
+ * @param {state} state State of Simulation
+ * @param {number} wallReboundCoff Rebound from wall
  * @param {number[]} [border] - Optional [wallposX, wallposY, wall0X, wall0Y] to override the boundary. Defaults canvas.
  */
-function updateparticle(element, state, border = [state.canvasSize, state.canvasSize, 0, 0]) {
+function updateparticle(element, state, wallReboundCoff = state.wallReboundCoff, border = [state.canvasSize, state.canvasSize, 0, 0]) {
     element.x += element.vx
     element.y += element.vy
+    state.wallReboundCoff = wallReboundCoff
     const radius = state.diameter / 2
     if (element.x > border[0] - radius || element.x < border[2] + radius) {
         element.x = Math.max(wall0X + radius, Math.min(wallposX - radius, element.x))
@@ -143,11 +147,17 @@ function updateparticle(element, state, border = [state.canvasSize, state.canvas
     element.oldVy = element.vy;
 }
 
-function checkcollision(particleList, diameter) {
-    for (let a = 0; a < particleList.length; a++) {
-        for (let b = a + 1; b < particleList.length; b++) {
-            let element = particleList[a];
-            let j = particleList[b];
+/**
+ * Checks for collisions and applies proper elastic collisions
+ * @param {Object[]} particles Particles Array
+ * @param {state} state State of Simulation
+ */
+function checkcollision(particles, state) {
+    let diameter = state.diameter
+    for (let a = 0; a < particles.length; a++) {
+        for (let b = a + 1; b < particles.length; b++) {
+            let element = particles[a];
+            let j = particles[b];
 
             let dx = j.x - element.x;
             let dy = j.y - element.y;
@@ -183,6 +193,10 @@ function checkcollision(particleList, diameter) {
         }
     }
 }
+
+// For Gas    => updatematter(i, gas,    0,   0,    1,    1,   1,        diameter)
+// For Liquid => updatematter(i, liquid, 0.1, 0.05, 0.99, 0.9, 1,        diameter)
+// For Solid  => updatematter(i, solid,  0,   3,    0.9,  0.9, Infinity, diameter)
 
 function updatematter(element, matter, gravity, attractive_coeff, relativeSlowing, retardation, maxForce, diameter) {
     //gravity
