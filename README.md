@@ -53,9 +53,10 @@ This project to to help explain the different gaseous laws and their relations i
 ### Physics Engine
 
 - Update Matter, uses [Lennard-Jones Potential](https://www.sciencedirect.com/topics/pharmacology-toxicology-and-pharmaceutical-science/lennard-jones-potential) the to completly revamp attraction between the particles and also to replicate liquid, gases and solid. ![Desmos graph of how this works!](https://www.desmos.com/calculator/0umqgghqjf)
-  - For Gas => updatematter(i, gas, 0, 0, 1, 1, 1, diameter)
-  - For Liquid => updatematter(i, liquid, 0.1, 0.05, 0.99, 0.9, 1, diameter)
-  - For Solid => updatematter(i, solid, 0, 3, 0.9, 0.9, Infinity, diameter)
+- updatematter(element, matter, state, gravity, { attractiveCoff, relativeSlowing, retardation, maxForce })
+  - For Gas    => updatematter(i, gas,    state, 0,   { attractiveCoff: 0, relativeSlowing: 1,    retardation: 1,   maxForce: 1 })
+  - For Liquid => updatematter(i, liquid, state, 0.1, { attractiveCoff: 0.05, relativeSlowing: 0.99, retardation: 0.9, maxForce: 1 })
+  - For Solid  => updatematter(i, solid,  state, 0,   { attractiveCoff: 3, relativeSlowing: 0.9,  retardation: 0.9, maxForce: Infinity })
 - random_motion & thermostat uses [Brownian motion of Multiple particle](https://paleodyn.uni-bremen.de/study/Dyn2/dyn2script_SCM.pdf) to calculate Brownian Motion and their temperatures!
 - Plunger Mechanics => Fuction uses  updatePlunger and initPlunger to make an object inline with thermodynamic processes like Isothermal expansion.
 - Right now, there is more to come! But, as of now these are the scientific principals I have used.

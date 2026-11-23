@@ -1,12 +1,19 @@
 
-class state {
+class stateSimulation {
     containerId = ""; // to be init
     nballs = 0; // to be init
     canvasSize = 0; // set by getCanvasSize()
     userViewing = false; // set by getUserVisible()
     diameter = 0;
-    selectedParticle = 0;
+    selectedParticle = null;
     wallReboundCoff = 0;
+    gravity = 0;
+    matter = {
+        attractiveCoff: 0,
+        relativeSlowing: 0,
+        retardation: 0,
+        maxForce: 0,
+    };
 }
 
 /**
@@ -64,7 +71,7 @@ function balls_init(state, spacing = undefined, offset = undefined) {
 
     let particles = []
     const rows = Math.ceil(state.nballs / Math.sqrt(state.nballs))
-    spacing = (spacing === undefined) ? Math.round(canvasSize / (rows + 1)) : spacing
+    spacing = (spacing === undefined) ? Math.round(state.canvasSize / (rows + 1)) : spacing
     let posx = 0
     let index = 0
     offset = (offset === undefined) ? 0 : offset
@@ -136,11 +143,11 @@ function updateparticle(element, state, wallReboundCoff = state.wallReboundCoff,
     state.wallReboundCoff = wallReboundCoff
     const radius = state.diameter / 2
     if (element.x > border[0] - radius || element.x < border[2] + radius) {
-        element.x = Math.max(wall0X + radius, Math.min(wallposX - radius, element.x))
+        element.x = Math.max(border[2] + radius, Math.min(border[0] - radius, element.x))
         element.vx *= -state.wallReboundCoff
     }
     if (element.y > border[1] - radius || element.y < border[3] + radius) {
-        element.y = Math.max(wall0Y + radius, Math.min(wallposY - radius, element.y))
+        element.y = Math.max(border[3] + radius, Math.min(border[1] - radius, element.y))
         element.vy *= -state.wallReboundCoff
     }
     element.oldVx = element.vx;
@@ -194,17 +201,28 @@ function checkcollision(particles, state) {
     }
 }
 
-// For Gas    => updatematter(i, gas,    0,   0,    1,    1,   1,        diameter)
-// For Liquid => updatematter(i, liquid, 0.1, 0.05, 0.99, 0.9, 1,        diameter)
-// For Solid  => updatematter(i, solid,  0,   3,    0.9,  0.9, Infinity, diameter)
+// For Gas    => updatematter(i, gas,    state, 0,   { attractiveCoff: 0, relativeSlowing: 1,    retardation: 1,   maxForce: 1 })
+// For Liquid => updatematter(i, liquid, state, 0.1, { attractiveCoff: 0.05, relativeSlowing: 0.99, retardation: 0.9, maxForce: 1 })
+// For Solid  => updatematter(i, solid,  state, 0,   { attractiveCoff: 3, relativeSlowing: 0.9,  retardation: 0.9, maxForce: Infinity })
 
-function updatematter(element, matter, gravity, attractive_coeff, relativeSlowing, retardation, maxForce, diameter) {
+/**
+ * Updates the matter and their reactions based on the Lennard-Jones Potential and Retards movement
+ * @param {Object} element Runs on each particle independantly
+ * @param {Object[]} matter Particles Array
+ * @param {state} state State of Simulation
+ * @param {number} [gravity] Specific Gravity
+ * @param {Object} [param4] Object of {attractiveCoff, relativeSlowing, retardation, maxForce}
+ */
+function updatematter(element, matter, state, gravity = state.gravity, { attractiveCoff, relativeSlowing, retardation, maxForce } = state.matter) {
+    state.matter = { attractiveCoff, relativeSlowing, retardation, maxForce }
+
     //gravity
-    element.vy += gravity
+    state.gravity = gravity
+    element.vy += state.gravity
 
     //attraction by Lennard-Jones Potential
-    let E = attractive_coeff; //Depth of potential well so attraction
-    let s = (diameter * 1.25) / Math.pow(2, 1 / 6);
+    let E = state.matter.attractiveCoff; //Depth of potential well so attraction
+    let s = (state.diameter * 1.25) / Math.pow(2, 1 / 6);
     let equilibriumDistance = Math.pow((2 * (s ** 6)), 1 / 6)
     let distance_cutoff_sq = (2.5 * s) ** 2
     for (let j of matter) {
@@ -217,7 +235,7 @@ function updatematter(element, matter, gravity, attractive_coeff, relativeSlowin
         let distance_clamp_sq = Math.max(distance_sq, (s ** 2))
         let force = 24 * E * (2 * (s * s / distance_clamp_sq) ** 6 - (s * s / distance_clamp_sq) ** 3) / distance_clamp_sq
         const distance = Math.sqrt(distance_sq)
-        if (Math.abs(force * distance) > maxForce) force = Math.sign(force) * maxForce / distance
+        if (Math.abs(force * distance) > state.matter.maxForce) force = Math.sign(force) * state.matter.maxForce / distance
 
         element.vx -= force * dx
         element.vy -= force * dy
@@ -227,40 +245,25 @@ function updatematter(element, matter, gravity, attractive_coeff, relativeSlowin
     let sum_dy = 0
     let sum_dx = 0
     let neighborCount = 0
+    let slowing = (1 - state.matter.relativeSlowing)
     for (let j of matter) {
         if (j === element) continue
         const dx = j.x - element.x
         const dy = j.y - element.y
         if (dx * dx + dy * dy < (1.5 * relative_energy) ** 2) {
-            sum_dx += (j.oldVx - element.oldVx) * (1 - relativeSlowing)
-            sum_dy += (j.oldVy - element.oldVy) * (1 - relativeSlowing)
+            sum_dx += (j.oldVx - element.oldVx) * slowing
+            sum_dy += (j.oldVy - element.oldVy) * slowing
             neighborCount++
         }
     }
     if (neighborCount > 0) {
-        element.vx += (sum_dx / neighborCount) * (1 - relativeSlowing)
-        element.vy += (sum_dy / neighborCount) * (1 - relativeSlowing)
+        element.vx += (sum_dx / neighborCount) * slowing
+        element.vy += (sum_dy / neighborCount) * slowing
     }
 
     //energy loss
-    element.vx *= retardation;
-    element.vy *= retardation;
-}
-
-//[Brownian motion of Multiple particle](https://paleodyn.uni-bremen.de/study/Dyn2/dyn2script_SCM.pdf)
-function random_motion() { //to duplicate normal distribution
-    let a = 1 - Math.random()
-    let b = Math.random()
-    let Box_Muller = Math.sqrt(-2 * Math.log(a)) * Math.cos(2 * Math.PI * b); //makes normal distribution
-    return Box_Muller
-}
-function thermostat(particles, temp_target, friction_strength, time_step) {
-    const decay = 1 - friction_strength * time_step
-    const noise = Math.sqrt(temp_target * (1 - decay ** 2))
-    for (const k of particles) {
-        k.vx = k.vx * decay + noise * random_motion();
-        k.vy = k.vy * decay + noise * random_motion();
-    }
+    element.vx *= state.matter.retardation;
+    element.vy *= state.matter.retardation;
 }
 
 // Pressure, Volume, Temp Changers and Functions
