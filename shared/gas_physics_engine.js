@@ -1,0 +1,492 @@
+
+class state {
+    containerId = ""; // to be init
+    nballs = 0; // to be init
+    canvasSize = 0; // set by getCanvasSize()
+    userViewing = false; // set by getUserVisible()
+}
+
+/**
+ * Sets size of canvas based on clientWidth
+ * @param {Largest possible canvas size} maxSize 
+ * @param {State of Simulation} state 
+ */
+function getCanvasSize(maxSize, state) {
+    const container = document.getElementById(state.containerId);
+    let available
+    if (container && container.clientWidth > 0) {
+        available = container.clientWidth
+    }
+    else {
+        available = window.innerWidth * 0.9
+    }
+    state.canvasSize = Math.min(maxSize, available)
+}
+
+/**
+ * To check if user views the Sim
+ * @param {State of Simulation} state 
+ */
+function getUserVisible(state) {
+    let userView = { visible: true }
+    let element = document.getElementById(state.containerId)
+    if (element && 'IntersectionObserver' in window) {
+        new IntersectionObserver(entries => {
+            userView.visible = entries[0].isIntersecting
+        }).observe(element)
+    } else {
+        state.userViewing = true
+    }
+    state.userViewing = userView
+}
+
+//Use in p.setup() to create balls array and set their initial positions also this is extermely buggy, it is better to leave last 2 parameters empty
+function balls_init(state, spacing = undefined, offset = undefined) {
+
+    const container = document.getElementById(state.containerId)
+    let available
+    if (container && container.clientWidth > 0) {
+        available = container.clientWidth
+    }
+    else {
+        available = window.innerWidth * 0.9
+    }
+    let proportionalballs = state.nballs * ((available / 400) ** 2)
+    state.nballs = Math.min(state.nballs, proportionalballs)
+
+    let particles = []
+    const rows = Math.ceil(state.nballs / Math.sqrt(state.nballs))
+    spacing = (spacing === undefined) ? Math.round(canvasSize / (rows + 1)) : spacing
+    let posx = 0
+    let index = 0
+    offset = (offset === undefined) ? 0 : offset
+
+    for (let x = 0; x < rows; x++) {
+        posx = (x % 2 == 0) ? posx + spacing : posx + spacing + offset
+        let posy = 0
+        for (let y = 0; y < rows; y++) {
+            posy = posy + spacing
+            particles.push({ x: posx, y: posy, vx: 0, vy: 0 })
+            index = index + 1
+            if (index >= state.nballs) {
+                return particles
+            }
+        }
+        if (index >= state.nballs) {
+            return particles
+        }
+    }
+    return particles
+}
+
+// Use in p.setup() to give particles array intital velocity on the basis of kinetic energy
+function balls_vrandom(particles, KE) {
+    let total = 0, avgx = 0, avgy = 0;
+
+    for (let p of particles) {
+        p.vx = Math.random() * 2 - 1;
+        p.vy = Math.random() * 2 - 1;
+
+        total += p.vx * p.vx + p.vy * p.vy;
+        avgx += p.vx
+        avgy += p.vy
+    }
+
+    const n = particles.length;
+    avgx /= n; avgy /= n;
+    for (let p of particles) {
+        p.vx -= avgx;
+        p.vy -= avgy;
+    }
+    total -= n * (avgx * avgx + avgy * avgy);
+
+    if (total === 0 || particles.length === 0) return;
+
+    let scale = Math.sqrt((2 * KE) / total);
+
+    for (let p of particles) {
+        p.vx *= scale;
+        p.vy *= scale;
+        p.oldVx = p.vx
+        p.oldVy = p.vy
+    }
+    return particles;
+}
+
+//Physics Stuff
+
+/**
+ * @param {number[]} [border] - Optional [wallposX, wallposY, wall0X, wall0Y] to override the boundary. Defaults canvas.
+ */
+function updateparticle(element, canvas_size, diameter, elasticity, border = [canvas_size, canvas_size, 0, 0]) {
+    const [wallposX, wallposY, wall0X, wall0Y] = border;
+    element.x += element.vx
+    element.y += element.vy
+    if (element.x > wallposX - (diameter / 2)) {
+        element.x = wallposX - (diameter / 2);
+        element.vx *= -elasticity;
+    }
+    if (element.x < wall0X + (diameter / 2)) {
+        element.x = wall0X + (diameter / 2);
+        element.vx *= -elasticity;
+    }
+    if (element.y < wall0Y + (diameter / 2)) {
+        element.y = wall0Y + (diameter / 2);
+        element.vy *= -elasticity;
+    }
+    if (element.y > wallposY - (diameter / 2)) {
+        element.y = wallposY - (diameter / 2);
+        element.vy *= -elasticity;
+    }
+    element.oldVx = element.vx;
+    element.oldVy = element.vy;
+}
+
+function checkcollision(particleList, diameter) {
+    for (let a = 0; a < particleList.length; a++) {
+        for (let b = a + 1; b < particleList.length; b++) {
+            let element = particleList[a];
+            let j = particleList[b];
+
+            let dx = j.x - element.x;
+            let dy = j.y - element.y;
+            let dist = Math.sqrt(dx * dx + dy * dy)
+
+            if (j === element) continue
+            if (dist <= diameter && dist > 0) {
+                let nx = dx / dist; //normal vectors
+                let ny = dy / dist;
+
+                let overlap = diameter - dist; //check how much they overlap
+                element.x -= nx * overlap / 2;
+                element.y -= ny * overlap / 2;
+                j.x += nx * overlap / 2;
+                j.y += ny * overlap / 2;
+
+                let tx = -ny //tangent
+                let ty = nx
+
+                let rvx = j.vx - element.vx;
+                let rvy = j.vy - element.vy;
+
+                let vn = rvx * nx + rvy * ny;
+
+                if (vn >= 0) continue;
+
+                element.vx += vn * nx;
+                element.vy += vn * ny;
+
+                j.vx -= vn * nx;
+                j.vy -= vn * ny;
+            }
+        }
+    }
+}
+
+function updatematter(element, matter, gravity, attractive_coeff, relativeSlowing, retardation, maxForce, diameter) {
+    //gravity
+    element.vy += gravity
+
+    //attraction by Lennard-Jones Potential
+    let E = attractive_coeff; //Depth of potential well so attraction
+    let s = (diameter * 1.25) / Math.pow(2, 1 / 6);
+    let equilibriumDistance = Math.pow((2 * (s ** 6)), 1 / 6)
+    let distance_cutoff_sq = (2.5 * s) ** 2
+    for (let j of matter) {
+        let dx = j.x - element.x;
+        let dy = j.y - element.y;
+        let distance_sq = dx * dx + dy * dy;
+        if (distance_sq === 0 || distance_sq > distance_cutoff_sq || j === element) {
+            continue
+        }
+        let distance_clamp_sq = Math.max(distance_sq, (s ** 2))
+        let force = 24 * E * (2 * (s * s / distance_clamp_sq) ** 6 - (s * s / distance_clamp_sq) ** 3) / distance_clamp_sq
+        const distance = Math.sqrt(distance_sq)
+        if (Math.abs(force * distance) > maxForce) force = Math.sign(force) * maxForce / distance
+
+        element.vx -= force * dx
+        element.vy -= force * dy
+    }
+
+    const relative_energy = Math.pow(2, 1 / 6) * s
+    let sum_dy = 0
+    let sum_dx = 0
+    let neighborCount = 0
+    for (let j of matter) {
+        if (j === element) continue
+        const dx = j.x - element.x
+        const dy = j.y - element.y
+        if (dx * dx + dy * dy < (1.5 * relative_energy) ** 2) {
+            sum_dx += (j.oldVx - element.oldVx) * (1 - relativeSlowing)
+            sum_dy += (j.oldVy - element.oldVy) * (1 - relativeSlowing)
+            neighborCount++
+        }
+    }
+    if (neighborCount > 0) {
+        element.vx += (sum_dx / neighborCount) * (1 - relativeSlowing)
+        element.vy += (sum_dy / neighborCount) * (1 - relativeSlowing)
+    }
+
+    //energy loss
+    element.vx *= retardation;
+    element.vy *= retardation;
+}
+
+//[Brownian motion of Multiple particle](https://paleodyn.uni-bremen.de/study/Dyn2/dyn2script_SCM.pdf)
+function random_motion() { //to duplicate normal distribution
+    let a = 1 - Math.random()
+    let b = Math.random()
+    let Box_Muller = Math.sqrt(-2 * Math.log(a)) * Math.cos(2 * Math.PI * b); //makes normal distribution
+    return Box_Muller
+}
+function thermostat(particles, temp_target, friction_strength, time_step) {
+    const decay = 1 - friction_strength * time_step
+    const noise = Math.sqrt(temp_target * (1 - decay ** 2))
+    for (const k of particles) {
+        k.vx = k.vx * decay + noise * random_motion();
+        k.vy = k.vy * decay + noise * random_motion();
+    }
+}
+
+// Pressure, Volume, Temp Changers and Functions
+
+/**
+ * How is Pressure Defined?
+ * => Pressure is defined as the impulse of all the iteractions of the particles with the wall (force) divided by the perimeter.
+ * 
+ * How is Temperature Defined?
+ * => Temperature is defined as the average Kinetic Energy of all the particles.
+ * 
+ * How is Volume Defined? 
+ * => As the Area taken by the particles with respect to their Kinetic energy
+ */
+
+/**
+ * latest => Most recent value
+ * target => Value to reach
+ * iteration_limit => number of iterations that is to be counted for averages
+ * freedom => if "fixed" => value is fixed
+ *            if "set" => value is set by target
+ *            if "variable" => value is set by matter or particles array
+ * data_store => stores data essential for average calculations
+ */
+class state_pressure {
+    latest = 0;
+    target = 0;
+    iteration_limit = 0;
+    freedom = "fixed";
+    data_store = { pressure_history: [] };
+}
+class state_temperature {
+    latest = 0;
+    target = 0;
+    iteration_limit = 0;
+    freedom = "fixed";
+    data_store = { temperature_history: [], strength_tempChange: 0 };
+}
+class state_volume {
+    latest = 0;
+    target = 0;
+    iteration_limit = 0;
+    freedom = "fixed";
+    data_store = { piston_velocity: 0, piston_mass: 0, external_Force: 0, piston_impulse_hist: [] };
+}
+
+function updatePressure(particles, state_pressure, border, diameter) {
+    const [wallposX, wallposY, wall0X, wall0Y] = border;
+    if (state_pressure.freedom === "fixed") { // Isobaric Process
+
+    }
+    if (state_pressure.freedom === "set") { // Processes where Pressure is controlled (never)
+
+    }
+    if (state_pressure.freedom === "variable") { // All other Processes
+        let impulse = 0
+        for (let i of particles) {
+            impulse += (i.x + i.vx + diameter / 2 > wallposX) ? (2 * Math.abs(i.vx)) : 0
+            impulse += (i.x + i.vx - diameter / 2 < wall0X) ? (2 * Math.abs(i.vx)) : 0
+            impulse += (i.y + i.vy + diameter / 2 > wallposY) ? (2 * Math.abs(i.vy)) : 0
+            impulse += (i.y + i.vy - diameter / 2 < wall0Y) ? (2 * Math.abs(i.vy)) : 0
+        }
+        const force = impulse
+        const perimeter = 2 * (wallposX - wall0X) + 2 * (wallposY - wall0Y)
+        state_pressure.data_store.pressure_history.push(force / perimeter)
+
+        if (state_pressure.data_store.pressure_history.length > state_pressure.iteration_limit) {
+            state_pressure.data_store.pressure_history.shift()
+        }
+        let sum_pressure = 0
+        for (let i = 0; i < state_pressure.data_store.pressure_history.length; i++) {
+            sum_pressure += state_pressure.data_store.pressure_history[i]
+        }
+        state_pressure.latest = sum_pressure / state_pressure.data_store.pressure_history.length
+    }
+}
+
+function updateTemperature(particles, state_temperature, border) {
+    const [wallposX, wallposY, wall0X, wall0Y] = border;
+    if (state_temperature.freedom === "fixed") { // Isothermal Process
+
+    }
+    if (state_temperature.freedom === "set") { // Processes where Temperature is controlled
+        let ke = 0
+        for (const p of particles) {
+            ke += (p.vx * p.vx + p.vy * p.vy) / 2
+        }
+
+        const temp_now = Math.max(ke / particles.length, 1e-6)
+        const scale = 1 + state_temperature.data_store.strength_tempChange * (Math.sqrt(state_temperature.target / temp_now) - 1)
+
+        for (const p of particles) {
+            p.vx *= scale
+            p.vy *= scale
+        }
+        state_temperature.latest = temp_now
+    }
+    if (state_temperature.freedom === "variable") { // All other Processes
+        let ke = 0
+        for (const p of particles) {
+            ke += (p.vx * p.vx + p.vy * p.vy) / 2
+        }
+        const temp_now = Math.max(ke / particles.length, 1e-6)
+        state_temperature.latest = temp_now
+    }
+}
+
+
+function bgTempChange(particles, strength) {
+    let ke = 0
+    let old_ke = 0
+    for (const p of particles) ke += (p.vx * p.vx + p.vy * p.vy) / 2
+    const temp_now = Math.max(ke / particles.length, 1e-6)
+    for (const p of particles) old_ke += (p.oldVx * p.oldVx + p.oldVy * p.oldVy) / 2
+    const temp_old = Math.max(old_ke / particles.length, 1e-6)
+
+    let temp_diff = Math.abs(temp_now - temp_old)
+    let heating = ((temp_now - temp_old) > 0) ? 1 : 0
+    let baseColor = [167, 167, 167]
+
+    if (heating === 1) {
+        const change = 88 * Math.tanh(strength * temp_diff / temp_old)
+        baseColor = [167 + change, 167, 167]
+    }
+    if (heating === 0) {
+        const change = 88 * Math.tanh(strength * temp_diff / temp_old)
+        baseColor = [167, 167, 167 + change]
+    }
+
+    return baseColor
+}
+
+function updateVolume(particles, state_volume, border, diameter) {
+    let [wallposX, wallposY, wall0X, wall0Y] = border;
+    if (state_volume.freedom === "fixed") { // Isochoric Process
+        let vol = (wallposX - wall0X) * (wallposY - wall0Y)
+        state_volume.latest = vol
+    }
+    if (state_volume.freedom === "set") { // Processes where Volume is controlled
+        let vol = (wallposX - wall0X) * (wallposY - wall0Y)
+
+        // setting volume
+        let dif = (state_volume.target - vol) / state_volume.iteration_limit
+        wall0Y = wallposY - (vol + dif) / (wallposX - wall0X)
+        wall0Y = Math.max(0, Math.min(wallposY - 2 * diameter, wall0Y))
+        border[3] = wall0Y
+        state_volume.latest = vol + dif
+    }
+    if (state_volume.freedom === "variable") { // All other Processes
+        let vol = (wallposX - wall0X) * (wallposY - wall0Y)
+
+        // piston movement
+        /// impluse on piston
+        let impulse = 0
+        for (let i of particles) {
+            impulse += (i.vy < 0 && i.y + i.vy - diameter / 2 < wall0Y) ? (2 * Math.abs(i.vy)) : 0
+        }
+        state_volume.data_store.piston_impulse_hist.push(impulse)
+
+        if (state_volume.data_store.piston_impulse_hist.length > state_volume.iteration_limit) {
+            state_volume.data_store.piston_impulse_hist.shift()
+        }
+        let sum_pressure = 0
+        for (let i = 0; i < state_volume.data_store.piston_impulse_hist.length; i++) {
+            sum_pressure += state_volume.data_store.piston_impulse_hist[i]
+        }
+        let AvgImpulse = sum_pressure / state_volume.data_store.piston_impulse_hist.length
+        // motion of piston
+        state_volume.data_store.piston_velocity += (state_volume.data_store.external_Force - AvgImpulse) / state_volume.data_store.piston_mass
+        state_volume.data_store.piston_velocity = Math.max(-diameter, Math.min(diameter, state_volume.data_store.piston_velocity))
+
+        // setting volume
+        wall0Y += state_volume.data_store.piston_velocity
+        wall0Y = Math.max(0, Math.min(wallposY - 2 * diameter, wall0Y))
+        border[3] = wall0Y
+        state_volume.latest = (wallposX - wall0X) * (wallposY - wall0Y)
+    }
+}
+
+function drawPiston(p, side, border) {
+    let [wallposX, wallposY, wall0X, wall0Y] = border;
+    const thickness = 8;
+    p.noStroke();
+    p.fill('#B7410E');
+    if (wall0Y > 0) p.rect(0, wall0Y - thickness, side, thickness)
+}
+
+// Mouse interaction functions
+
+function attractMouse(element, mouseX, mouseY, attractForce, attractDistance, maxAttraction = 25) {
+    let dx = mouseX - element.x;
+    let dy = mouseY - element.y;
+    let distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance > 0 && (attractForce > 0 ? distance < attractDistance : distance > attractDistance)) {
+        let angle = Math.atan2(dy, dx);
+        let force = attractForce / Math.max((distance * distance), maxAttraction);
+        element.vx += force * Math.cos(angle);
+        element.vy += force * Math.sin(angle);
+    }
+}
+
+function mouseInteract(element, mouseX, mouseY, diameter) {
+    let dx = element.x - mouseX
+    let dy = element.y - mouseY
+    let distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance < diameter) {
+        return true
+    }
+    else {
+        return false
+    }
+}
+
+function drawVector(p, x1, y1, x2, y2) {
+    const dx = x1 - x2
+    const dy = y1 - y2
+    const distance = Math.sqrt(dx ** 2 + dy ** 2)
+    const cos_theta = dx / distance
+    const sine_theta = dy / distance
+
+    const arrow_x = (x2 + 5 * x1) / 6
+    const arrow_y = (y2 + 5 * y1) / 6
+    const r = (distance / 10)
+    const arrow_x1 = arrow_x + r * -sine_theta
+    const arrow_x2 = arrow_x - r * -sine_theta
+    const arrow_y1 = arrow_y + r * cos_theta
+    const arrow_y2 = arrow_y - r * cos_theta
+
+    p.triangle(x1, y1, arrow_x1, arrow_y1, arrow_x2, arrow_y2)
+    p.strokeWeight(r / 5)
+    p.line(x1, y1, x2, y2)
+}
+
+function applyForce(element, mouseX, mouseY, diameter, forceMultiplier, maxForce) {
+    let dx = mouseX - element.x
+    let dy = mouseY - element.y
+    let distance = Math.sqrt(dx * dx + dy * dy);
+    if (distance >= diameter / 2) {
+        let angle = Math.atan2(dy, dx);
+        let force = Math.min(forceMultiplier * distance, maxForce);
+        element.vx += force * Math.cos(angle);
+        element.vy += force * Math.sin(angle);
+    }
+}
